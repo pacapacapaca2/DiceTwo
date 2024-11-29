@@ -1,51 +1,60 @@
+/* Основные стили */
+:root {
+    --bg-color: #1e1e2f;
+    --text-color: #ffffff;
+    --nav-bg-color: #2b2b3c;
+    --nav-text-color: #ffffff;
+    --active-panel-bg: #007bff;
+}
+
 body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background-color: var(--bg-color, #f4f4f9);
     margin: 0;
-    padding: 0;
-    color: var(--text-color, #000);
+    font-family: Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
 }
 
 .container {
-    margin: 50px auto;
-    width: 90%;
-    max-width: 500px;
-    background: var(--card-bg-color, #fff);
     padding: 20px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
+    text-align: center;
+    display: none; /* Панели скрыты по умолчанию */
 }
 
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    background-color: var(--button-bg-color, #007bff);
-    color: var(--button-text-color, #fff);
-    border: none;
-    border-radius: 5px;
+/* Панели */
+.panel {
+    display: none;
+    text-align: center;
+    padding: 50px;
 }
 
-button:active {
-    background-color: var(--button-active-bg-color, #0056b3);
+.panel h1 {
+    font-size: 24px;
+    color: var(--text-color);
 }
 
-/* Нижняя панель навигации */
+/* Нижняя панель */
 .bottom-nav {
     position: fixed;
     bottom: 0;
     width: 100%;
-    background-color: var(--nav-bg-color, #1e1e2f);
-    box-shadow: 0px -2px 6px rgba(0, 0, 0, 0.2);
+    background-color: var(--nav-bg-color);
     display: flex;
     justify-content: space-around;
     padding: 10px 0;
+    box-shadow: 0px -2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .nav-item {
-    text-align: center;
-    color: var(--nav-text-color, #ccc);
+    background: none;
+    border: none;
+    color: var(--nav-text-color);
     font-size: 14px;
-    text-decoration: none;
+    cursor: pointer;
+    padding: 10px 15px;
+    text-align: center;
+    flex: 1;
+}
+
+.nav-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
 }
