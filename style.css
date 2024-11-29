@@ -30,8 +30,8 @@ body {
     width: 100%;
     background-color: #29293d;
     display: flex;
-    justify-content: space-between; /* или space-around для равного расстояния */
-    padding: 10px 20px; /* Добавим отступы по бокам */
+    justify-content: space-evenly; /* Это сделает отступы между кнопками одинаковыми */
+    padding: 10px 0; /* Добавим отступы по бокам */
     box-shadow: 0px -2px 6px rgba(0, 0, 0, 0.2);
     box-sizing: border-box; /* Это гарантирует правильные размеры с учетом padding */
 }
@@ -49,7 +49,6 @@ body {
     color: white;
     font-size: 14px;
     cursor: pointer;
-    flex-grow: 1; /* Это заставляет кнопки занимать одинаковое пространство */
     padding: 5px;
 }
 
