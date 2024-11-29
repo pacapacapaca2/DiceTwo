@@ -1,27 +1,25 @@
-// Находим все элементы навигации
+// Найти все кнопки навигации и панели
 const navButtons = document.querySelectorAll('.nav-item');
 const panels = document.querySelectorAll('.panel');
 
-// Показываем первую панель при загрузке
-document.getElementById('panel-earn').style.display = 'block';
+// Показать первую панель при загрузке
+document.getElementById('panel-earn').style.display = 'flex';
+navButtons[0].classList.add('active');
 
-// Добавляем обработчики кликов
+// Добавить обработчики на кнопки
 navButtons.forEach((button) => {
     button.addEventListener('click', () => {
-        const targetPanel = button.dataset.target;
-
         // Скрыть все панели
-        panels.forEach((panel) => {
-            panel.style.display = 'none';
-        });
+        panels.forEach((panel) => (panel.style.display = 'none'));
 
         // Показать выбранную панель
-        document.getElementById(targetPanel).style.display = 'block';
+        const targetPanel = button.dataset.target;
+        document.getElementById(targetPanel).style.display = 'flex';
 
-        // Удаляем класс "active" со всех кнопок
+        // Удалить класс active со всех кнопок
         navButtons.forEach((btn) => btn.classList.remove('active'));
 
-        // Добавляем класс "active" на выбранную кнопку
+        // Добавить класс active к текущей кнопке
         button.classList.add('active');
     });
 });
