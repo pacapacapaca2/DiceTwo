@@ -5,6 +5,4 @@ document.getElementById('roll-dice').addEventListener('click', () => {
     playerPosition += diceRoll;
 
     document.getElementById('position').innerText = playerPosition;
-
-    alert(`You rolled: ${diceRoll}. New position: ${playerPosition}`);
 });
