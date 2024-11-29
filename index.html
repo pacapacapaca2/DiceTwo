@@ -5,78 +5,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Интерфейс с панелями</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: var(--tg-theme-bg-color);
-            color: var(--tg-theme-text-color);
-        }
+   <style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: var(--tg-theme-bg-color);
+        color: var(--tg-theme-text-color);
+    }
 
-        .container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 90vh;
-        }
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 90vh;
+    }
 
-        .panel {
-            display: none;
-            width: 90%;
-            padding: 20px;
-            background: #232e3c;
-            border-radius: 10px;
-            text-align: center;
-        }
+    .panel {
+        display: none;
+        width: 90%;
+        padding: 20px;
+        background: #232e3c;
+        border-radius: 10px;
+        text-align: center;
+    }
 
-        .panel.active {
-            display: block;
-        }
+    .panel.active {
+        display: block;
+    }
 
-        .bottom-nav {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: var(--tg-theme-bg-color);
-            padding: 10px 0;
-            border-top: 1px solid #111921;
-        }
+    .bottom-nav {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        background: var(--tg-theme-bg-color);
+        padding: 15px 0; /* Увеличено для большего пространства */
+        border-top: 1px solid #111921;
+    }
 
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: none;
-            border: none;
-            color: var(--tg-theme-text-color);
-            font-size: 12px;
-            cursor: pointer;
-        }
+    .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: none;
+        border: none;
+        color: var(--tg-theme-text-color);
+        font-size: 14px; /* Увеличено для более крупного текста */
+        cursor: pointer;
+        padding: 10px; /* Увеличено для большей кликабельной зоны */
+    }
 
-        .nav-item svg {
-            width: 24px;
-            height: 24px;
-            margin-bottom: 5px;
-            fill: var(--tg-theme-button-text-color);
-        }
+    .nav-item svg {
+        width: 36px; /* Увеличено с 24px */
+        height: 36px; /* Увеличено с 24px */
+        margin-bottom: 8px; /* Увеличен промежуток */
+        fill: var(--tg-theme-button-text-color);
+    }
 
-        .nav-item img {
-            width: 24px;
-            height: 24px;
-            margin-bottom: 5px;
-        }
+    .nav-item img {
+        width: 36px; /* Увеличено с 24px */
+        height: 36px; /* Увеличено с 24px */
+        margin-bottom: 8px; /* Увеличен промежуток */
+    }
 
-        .nav-item span {
-            font-size: 12px;
-        }
+    .nav-item span {
+        font-size: 14px; /* Увеличено с 12px */
+    }
 
-        .nav-item.active {
-            color: var(--tg-theme-button-color);
-        }
-    </style>
+    .nav-item.active {
+        color: var(--tg-theme-button-color);
+    }
+</style>
 </head>
 <body>
     <div class="container">
