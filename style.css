@@ -17,7 +17,6 @@ body {
 .container {
     padding: 20px;
     text-align: center;
-    display: none; /* Панели скрыты по умолчанию */
 }
 
 /* Панели */
@@ -57,4 +56,10 @@ body {
 
 .nav-item:hover {
     background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Активная кнопка */
+.nav-item.active {
+    color: #ffcc00;
+    font-weight: bold;
 }
