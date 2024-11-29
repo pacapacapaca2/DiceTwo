@@ -1,38 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panels Interface</title>
+    <title>Интерфейс с панелями</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <!-- Панели -->
-        <div class="panel" id="panel-earn">
-            <h1>Панель "Заработать"</h1>
-        </div>
-        <div class="panel" id="panel-games">
-            <h1>Панель "Игры"</h1>
-        </div>
-        <div class="panel" id="panel-top">
-            <h1>Панель "Топ"</h1>
-        </div>
-        <div class="panel" id="panel-airdrop">
-            <h1>Панель "Подарки"</h1>
-        </div>
-        <div class="panel" id="panel-profile">
-            <h1>Панель "Профиль"</h1>
+        <!-- Основной блок панелей -->
+        <div id="panel-container">
+            <div class="panel" id="panel-earn">Панель "Заработать"</div>
+            <div class="panel" id="panel-games">Панель "Игры"</div>
+            <div class="panel" id="panel-top">Панель "Топ"</div>
+            <div class="panel" id="panel-gifts">Панель "Подарки"</div>
+            <div class="panel" id="panel-profile">Панель "Профиль"</div>
         </div>
     </div>
 
-    <!-- Нижняя навигация -->
+    <!-- Нижняя панель навигации -->
     <div class="bottom-nav">
-        <button class="nav-item" data-target="panel-earn">Заработать</button>
-        <button class="nav-item" data-target="panel-games">Игры</button>
-        <button class="nav-item" data-target="panel-top">Топ</button>
-        <button class="nav-item" data-target="panel-airdrop">Подарки</button>
-        <button class="nav-item" data-target="panel-profile">Профиль</button>
+        <button class="nav-item" data-target="panel-earn">
+            <img src="profile.svg" alt="Иконка">
+            <span>Заработать</span>
+        </button>
+        <button class="nav-item" data-target="panel-games">
+            <img src="profile.svg" alt="Иконка">
+            <span>Игры</span>
+        </button>
+        <button class="nav-item" data-target="panel-top">
+            <img src="profile.svg" alt="Иконка">
+            <span>Топ</span>
+        </button>
+        <button class="nav-item" data-target="panel-gifts">
+            <img src="profile.svg" alt="Иконка">
+            <span>Подарки</span>
+        </button>
+        <button class="nav-item" data-target="panel-profile">
+            <img src="profile.svg" alt="Иконка">
+            <span>Профиль</span>
+        </button>
     </div>
 
     <script src="script.js"></script>
