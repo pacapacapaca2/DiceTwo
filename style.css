@@ -47,30 +47,39 @@ body {
     color: white;
     font-size: 14px;
     cursor: pointer;
-    flex-grow: 1; /* Равномерное распределение кнопок */
     padding: 10px 0; /* Добавим вертикальные отступы для кнопок */
-    transition: background-color 0.3s ease;
+    transition: color 0.3s ease, transform 0.3s ease;
 }
 
 .nav-item img {
     width: 24px;
     height: 24px;
     margin-bottom: 5px;
+    transition: filter 0.3s ease; /* Для плавного изменения цвета иконки */
 }
 
 .nav-item span {
     font-size: 14px;
     text-align: center;
+    transition: color 0.3s ease; /* Для плавного изменения цвета текста */
 }
 
-/* Эффект при нажатии */
-.nav-item.active {
-    background-color: #2a3b4c; /* Темно-синий цвет для активной кнопки */
+/* Эффект при нажатии на кнопку (только для текста и изображения) */
+.nav-item.active img {
+    filter: brightness(0) saturate(100%) invert(20%) sepia(70%) saturate(500%) hue-rotate(180deg);
+}
+
+.nav-item.active span {
+    color: #2a3b4c; /* Темно-синий цвет для текста */
 }
 
 /* Наведение на кнопку */
-.nav-item:hover {
-    background-color: #333;
+.nav-item:hover img {
+    filter: brightness(0) saturate(100%) invert(50%) sepia(70%) saturate(400%) hue-rotate(180deg);
+}
+
+.nav-item:hover span {
+    color: #f5f5f5; /* Цвет текста при наведении */
 }
 
 /* При фокусе кнопки */
