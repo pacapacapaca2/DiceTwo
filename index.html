@@ -1,51 +1,46 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Интерфейс профиля</title>
+    <title>Panels Interface</title>
     <link rel="stylesheet" href="style.css">
-    <script src="httpкs://telegram.org/js/telegram-web-app.js"></script>
-    <script src="script.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>Ваш Профиль</h1>
-        <div class="profile">
-            <button id="theme-button">Нажми меня</button>
+        <!-- Панель 1 -->
+        <div class="panel" id="panel-earn">
+            <h1>Earn</h1>
+        </div>
+
+        <!-- Панель 2 -->
+        <div class="panel" id="panel-games">
+            <h1>Games</h1>
+        </div>
+
+        <!-- Панель 3 -->
+        <div class="panel" id="panel-top">
+            <h1>Top</h1>
+        </div>
+
+        <!-- Панель 4 -->
+        <div class="panel" id="panel-airdrop">
+            <h1>Airdrop</h1>
+        </div>
+
+        <!-- Панель 5 -->
+        <div class="panel" id="panel-profile">
+            <h1>Profile</h1>
         </div>
     </div>
 
+    <!-- Нижняя навигационная панель -->
     <div class="bottom-nav">
-        <a href="#" class="nav-item">
-            <div class="nav-badge">
-                <img src="profile.svg" alt="Earn">
-                <div class="badge">32</div>
-            </div>
-            <span>Заработать</span>
-        </a>
-        <a href="#" class="nav-item">
-            <div class="nav-badge">
-                <img src="profile.svg" alt="Games">
-                <div class="badge">5</div>
-            </div>
-            <span>Игры</span>
-        </a>
-        <a href="#" class="nav-item">
-            <img src="profile.svg" alt="Top">
-            <span>Топ</span>
-        </a>
-        <a href="#" class="nav-item">
-            <img src="profile.svg" alt="Airdrop">
-            <span>Подарки</span>
-        </a>
-        <a href="#" class="nav-item">
-            <div class="nav-badge">
-                <img src="profile.svg" alt="Profile">
-                <div class="badge">1</div>
-            </div>
-            <span>Профиль</span>
-        </a>
+        <button class="nav-item" data-target="panel-earn">Earn</button>
+        <button class="nav-item" data-target="panel-games">Games</button>
+        <button class="nav-item" data-target="panel-top">Top</button>
+        <button class="nav-item" data-target="panel-airdrop">Airdrop</button>
+        <button class="nav-item" data-target="panel-profile">Profile</button>
     </div>
 
     <script src="script.js"></script>
