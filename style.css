@@ -47,6 +47,9 @@ body {
     color: white;
     font-size: 14px;
     cursor: pointer;
+    flex-grow: 1; /* Равномерное распределение кнопок */
+    padding: 10px 0; /* Добавим вертикальные отступы для кнопок */
+    transition: background-color 0.3s ease;
 }
 
 .nav-item img {
@@ -60,6 +63,17 @@ body {
     text-align: center;
 }
 
+/* Эффект при нажатии */
+.nav-item.active {
+    background-color: #2a3b4c; /* Темно-синий цвет для активной кнопки */
+}
+
+/* Наведение на кнопку */
+.nav-item:hover {
+    background-color: #333;
+}
+
+/* При фокусе кнопки */
 .nav-item:focus {
     outline: none;
 }
