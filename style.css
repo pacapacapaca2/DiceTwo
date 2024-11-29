@@ -45,7 +45,7 @@ body {
     text-align: center;
     background: none;
     border: none;
-    outline: none;
+    outline: none; /* Убираем выделение на кнопке */
     color: white;
     font-size: 12px; /* Меньший размер текста */
     cursor: pointer;
@@ -73,12 +73,17 @@ body {
 }
 
 .nav-item.active span {
-    color: #25EFF4; /*цвет для текста */
+    color: #25EFF4; /* Цвет для текста */
 }
 
 /* При фокусе кнопки */
 .nav-item:focus {
-    outline: none;
+    outline: none; /* Убираем обводку при фокусе */
+}
+
+/* При активном состоянии кнопки */
+.nav-item:active {
+    outline: none; /* Убираем выделение при активном состоянии */
 }
 
 /* Активная панель */
