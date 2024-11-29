@@ -17,5 +17,11 @@ navButtons.forEach((button) => {
 
         // Показать выбранную панель
         document.getElementById(targetPanel).style.display = 'block';
+
+        // Удаляем класс "active" со всех кнопок
+        navButtons.forEach((btn) => btn.classList.remove('active'));
+
+        // Добавляем класс "active" на выбранную кнопку
+        button.classList.add('active');
     });
 });
