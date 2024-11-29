@@ -62,7 +62,7 @@ body {
 }
 
 .nav-item span {
-    font-size: 12px; /* Меньший размер текста */
+    font-size: 10px; /* Меньший размер текста */
     text-align: center;
     transition: color 0.3s ease; /* Для плавного изменения цвета текста */
 }
