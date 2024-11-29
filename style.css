@@ -47,7 +47,7 @@ body {
     border: none;
     outline: none;
     color: white;
-    font-size: 14px;
+    font-size: 12px; /* Меньший размер текста */
     cursor: pointer;
     padding: 5px;
     width: 20%; /* Устанавливаем фиксированную ширину для каждой кнопки */
@@ -55,14 +55,14 @@ body {
 }
 
 .nav-item img {
-    width: 24px;
-    height: 24px;
+    width: 32px; /* Увеличиваем размер иконки */
+    height: 32px;
     margin-bottom: 5px;
     transition: filter 0.3s ease; /* Для плавного изменения цвета иконки */
 }
 
 .nav-item span {
-    font-size: 14px;
+    font-size: 12px; /* Меньший размер текста */
     text-align: center;
     transition: color 0.3s ease; /* Для плавного изменения цвета текста */
 }
