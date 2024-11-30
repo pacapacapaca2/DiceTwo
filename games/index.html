@@ -125,32 +125,6 @@
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="/DiceTwo/theme-handler.js"></script>
-    <script>
-        // Получаем все ссылки в футере
-const links = document.querySelectorAll('footer a');
 
-// Функция для установки активного класса на текущую ссылку
-const setActiveLink = () => {
-    // Получаем текущий путь URL
-    const currentPath = window.location.pathname;
-
-    // Проходим по всем ссылкам
-    links.forEach(link => {
-        // Убираем активный класс у всех ссылок
-        link.classList.remove('_activeLink_lyone_11');
-        link.classList.add('_link_lyone_12');
-
-        // Если href ссылки совпадает с текущим путем, добавляем активный класс
-        if (link.getAttribute('href') === currentPath || (currentPath === '/' && link.getAttribute('href') === '/')) {
-            link.classList.add('_activeLink_lyone_11');
-            link.classList.remove('_link_lyone_12');
-        }
-    });
-};
-
-// Устанавливаем активную ссылку при загрузке страницы
-setActiveLink();
-
-    </script>
 </body>
 </html>
