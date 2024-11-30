@@ -145,9 +145,8 @@
             link.classList.remove('_activeLink_lyone_11');
             link.classList.add('_link_lyone_12');
 
-            // Если href ссылки совпадает с текущим путем
-            if (link.getAttribute('href') === currentPath || 
-                (currentPath === '/' && link.getAttribute('href') === '/')) {
+            // Если href ссылки включает текущий путь, добавляем активный класс
+            if (currentPath.includes(link.getAttribute('href'))) {
                 link.classList.add('_activeLink_lyone_11'); // Добавляем активный класс
                 link.classList.remove('_link_lyone_12'); // Убираем неактивный класс
             }
@@ -156,6 +155,10 @@
 
     // Устанавливаем активную ссылку при загрузке страницы
     setActiveLink();
+
+    // Обновляем активную ссылку при изменении истории (для SPA)
+    window.addEventListener('popstate', setActiveLink);
 </script>
+
 </body>
 </html>
