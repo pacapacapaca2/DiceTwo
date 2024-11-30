@@ -14,7 +14,13 @@ function applyTheme() {
     html.style.setProperty('--tg-theme-button-color', themeParams.button_color || '#40a7e3');
     html.style.setProperty('--tg-theme-button-text-color', themeParams.button_text_color || '#ffffff');
     html.style.setProperty('--tg-theme-text-color', themeParams.text_color || '#000000');
-    html.style.setProperty('--hint-color', themeParams.hint_color || '#999999'); // Добавлено для подсказок
+
+    // Динамическая настройка --hint-color для светлой и тёмной тем
+    if (tg.colorScheme === 'dark') {
+        html.style.setProperty('--hint-color', '#708499'); // Цвет для тёмной темы
+    } else {
+        html.style.setProperty('--hint-color', '#999999'); // Цвет для светлой темы
+    }
 }
 
 // Применяем тему при загрузке
