@@ -2,44 +2,64 @@ document.addEventListener("DOMContentLoaded", () => {
   const rollButton = document.getElementById("roll-button");
   const resultDiv = document.getElementById("result");
   const diceContainer = document.getElementById("dice-container");
-  const dice = document.getElementById("dice");
+  const dice1 = document.getElementById("dice1");
+  const dice2 = document.getElementById("dice2");
 
-  if (!rollButton || !resultDiv || !diceContainer || !dice) {
+  if (!rollButton || !resultDiv || !diceContainer || !dice1 || !dice2) {
     console.error("One or more DOM elements not found.");
     return;
   }
 
-  let currentAnimation = null; // Хранит текущую анимацию
+  let currentAnimations = []; // Хранит текущие анимации
 
-  // Обработчик кнопки Roll
   rollButton.addEventListener("click", () => {
     // Скрываем кнопку Roll
     rollButton.style.display = "none";
 
-    // Показываем контейнер для кубика
-    diceContainer.style.display = "block";
-    resultDiv.style.display = "none"; // Прячем результат до завершения анимации
+    // Показываем контейнеры для кубиков
+    diceContainer.style.display = "flex"; // Отображение контейнера
+    resultDiv.style.display = "none";    // Прячем результат до завершения анимации
 
-    const randomRoll = Math.floor(Math.random() * 6) + 1;
+    // Генерируем случайные числа для обоих кубиков
+    const randomRoll1 = Math.floor(Math.random() * 6) + 1;
+    const randomRoll2 = Math.floor(Math.random() * 6) + 1;
 
-    // Удаляем предыдущую анимацию, если она есть
-    if (currentAnimation) {
-      currentAnimation.destroy();
-    }
+    // Удаляем предыдущие анимации, если они есть
+    currentAnimations.forEach(animation => animation.destroy());
+    currentAnimations = [];
 
-    // Создаём новую анимацию
-    currentAnimation = lottie.loadAnimation({
-      container: dice, // Контейнер для анимации
-      renderer: "svg", // Используем SVG для рендеринга
-      loop: false,     // Анимация проигрывается один раз
-      autoplay: true,  // Автозапуск анимации
-      path: `dice${randomRoll}.json` // Путь к JSON-файлу
+    // Создаём анимации для кубиков
+    const animation1 = lottie.loadAnimation({
+      container: dice1,
+      renderer: "svg",
+      loop: false,
+      autoplay: true,
+      path: `dice${randomRoll1}.json`
     });
 
-    // Показываем результат после завершения анимации
-    currentAnimation.addEventListener("complete", () => {
-      resultDiv.textContent = `Result: ${randomRoll}`;
-      resultDiv.style.display = "block"; // Отображаем результат
+    const animation2 = lottie.loadAnimation({
+      container: dice2,
+      renderer: "svg",
+      loop: false,
+      autoplay: true,
+      path: `dice${randomRoll2}.json`
     });
+
+    currentAnimations.push(animation1, animation2);
+
+    // Показываем результат после завершения обеих анимаций
+    let completedAnimations = 0;
+    const onComplete = () => {
+      completedAnimations++;
+      if (completedAnimations === 2) {
+        const totalResult = randomRoll1 + randomRoll2;
+        resultDiv.textContent = `Result: ${randomRoll1} + ${randomRoll2} = ${totalResult}`;
+        resultDiv.style.display = "block"; // Отображаем результат
+        rollButton.style.display = "block"; // Показываем кнопку Roll снова
+      }
+    };
+
+    animation1.addEventListener("complete", onComplete);
+    animation2.addEventListener("complete", onComplete);
   });
 });
