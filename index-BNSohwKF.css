@@ -2330,7 +2330,7 @@ input[type="number"] {
 
 #roll-button {
     position: fixed;
-    bottom: 0px;
+    bottom: 100px;
     background-color: var(--tg-theme-button-color);
     color: var(--tg-theme-button-text-color);
     padding: 12px 24px; /* Увеличен размер кнопки */
