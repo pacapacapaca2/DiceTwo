@@ -2344,6 +2344,8 @@ input[type="number"] {
 
 
 #dice-container {
+    position: absolute; /* Позиционирование, как у кнопки */
+    bottom: 80px; /* Совпадает с bottom у кнопки */
     display: none;
     margin-top: 20px;
 }
