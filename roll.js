@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
       currentAnimation.destroy();
     }
 
-    // Загружаем и воспроизводим новую анимацию
+
     currentAnimation = lottie.loadAnimation({
       container: dice, // Контейнер для анимации
       renderer: "svg", // Используем SVG для рендеринга
