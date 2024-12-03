@@ -2311,29 +2311,52 @@ input[type="number"] {
     --pseudo-element-display: none;
   }
 }
-#app {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
+#result {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 1.5rem;
+            color: white;
+        }
 
-.center-btn {
-  padding: 15px 30px;
-  font-size: 18px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
+        #app {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+        }
 
-.center-btn:active {
-  background-color: #0056b3;
-}
+        #roll-button {
+            position: fixed;
+            bottom: 20px;
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
 
-/* Контейнер для кубика */
-#dice-container {
-  width: 100px;
-  height: 100px;
-}
+        #dice-container {
+            display: none;
+            margin-top: 10px;
+        }
+
+        /* Additional styling for dice animation container */
+        .dice {
+            width: 100px;
+            height: 100px;
+            background-color: #4caf50;
+            border-radius: 50%;
+            animation: spin 2s infinite linear;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
