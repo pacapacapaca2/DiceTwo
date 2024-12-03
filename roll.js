@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
     resultDiv.style.display = "block";
     diceContainer.style.display = "block";
 
-    // Генерируем случайное число от 1 до 6
+
     const randomRoll = Math.floor(Math.random() * 6) + 1;
 
     // Обновляем текст результата
