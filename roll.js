@@ -53,9 +53,8 @@ document.addEventListener("DOMContentLoaded", () => {
       completedAnimations++;
       if (completedAnimations === 2) {
         const totalResult = randomRoll1 + randomRoll2;
-        resultDiv.textContent = `Result: ${randomRoll1} + ${randomRoll2} = ${totalResult}`;
+        resultDiv.textContent = `Result: ${randomRoll1 + randomRoll2} = ${totalResult}`;
         resultDiv.style.display = "block"; // Отображаем результат
-        rollButton.style.display = "block"; // Показываем кнопку Roll снова
       }
     };
 
