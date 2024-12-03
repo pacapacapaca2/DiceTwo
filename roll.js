@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
       renderer: "svg", // Используем SVG для рендеринга
       loop: false,     // Анимация проигрывается один раз
       autoplay: true,  // Автозапуск анимации
-      path: `animations/dice${randomRoll}.json` // Путь к JSON-файлу
+      path: `dice${randomRoll}.json` // Путь к JSON-файлу
     });
   });
 });
