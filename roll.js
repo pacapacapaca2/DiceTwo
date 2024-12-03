@@ -4,16 +4,30 @@ document.addEventListener("DOMContentLoaded", () => {
   const diceContainer = document.getElementById("dice-container");
   const dice = document.getElementById("dice");
 
-  // Подключение анимаций через lottie-web
+  // Подключение анимаций через lottie-web с использованием fetch()
   const diceAnimations = [];
+  
+  // Функция загрузки анимации с помощью fetch
+  function loadAnimation(path) {
+    return fetch(path)
+      .then(response => response.json())
+      .then(animationData => {
+        return lottie.loadAnimation({
+          container: dice,
+          renderer: "svg",
+          loop: false,
+          autoplay: false,
+          animationData: animationData  // Используем данные анимации
+        });
+      })
+      .catch(err => {
+        console.error("Ошибка при загрузке анимации:", err);
+      });
+  }
+
+  // Загружаем анимации для каждого кубика с использованием raw URL
   for (let i = 1; i <= 6; i++) {
-    diceAnimations[i] = lottie.loadAnimation({
-      container: dice, // Контейнер для анимации
-      renderer: "svg", // Используем SVG для рендеринга
-      loop: false,     // Анимация проигрывается один раз
-      autoplay: false, // Запуск вручную
-      path: `dice${i}.json` // Путь к файлу анимации
-    });
+    diceAnimations[i] = loadAnimation(`https://raw.githubusercontent.com/pacapacapaca2/DiceTwo/main/dice${i}.json`);
   }
 
   // Обработчик кнопки Roll
