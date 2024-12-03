@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
       renderer: "svg", // Используем SVG для рендеринга
       loop: false,     // Анимация проигрывается один раз
       autoplay: true,  // Автозапуск анимации
-      path: `dice${randomRoll}.tgs` // Путь к файлу анимации
+      path: `/DiceTwo/dice${randomRoll}.tgs` // Путь к файлу анимации
     });
   });
 });
