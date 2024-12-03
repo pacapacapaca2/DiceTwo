@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
       renderer: "svg", // Используем SVG для рендеринга
       loop: false,     // Анимация проигрывается один раз
       autoplay: false, // Запуск вручную
-      path: `dice${i}.tgs` // Путь к файлу анимации
+      path: `dice${i}.json` // Путь к файлу анимации
     });
   }
 
