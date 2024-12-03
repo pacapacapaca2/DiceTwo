@@ -2318,6 +2318,7 @@ input[type="number"] {
     text-align: center;
     font-size: 2rem; /* Увеличен размер шрифта */
     color: white;
+    font-family: ui-rounded, sans-serif;
 }
 
 #app {
