@@ -51,6 +51,18 @@
                 <div class="content-scroll tg-secondary-bg">
                     <div class="tg-secondary-bg">
                         <div class="min-page-content-height">
+                         <div id="app">
+                                      <!-- Кнопка в центре -->
+                                      <button id="roll-button" class="center-btn">Roll</button>
+
+                                      <!-- Контейнер для отображения результата -->
+                                      <div id="result" style="display: none;">Result: </div>
+
+                                      <!-- Контейнер для анимации -->
+                                      <div id="dice-container" style="display: none;">
+                                      <div id="dice" class="dice"></div>
+                                     </div>
+                            </div>
                             <style>
                                 @keyframes fadeBottomInUpAlert {
                                   0% {
@@ -93,18 +105,6 @@
                                   }
                                 }
                               </style>
-                         <div id="app">
-                                      <!-- Кнопка в центре -->
-                                      <button id="roll-button" class="center-btn">Roll</button>
-
-                                      <!-- Контейнер для отображения результата -->
-                                      <div id="result" style="display: none;">Result: </div>
-
-                                      <!-- Контейнер для анимации -->
-                                      <div id="dice-container" style="display: none;">
-                                      <div id="dice" class="dice"></div>
-                                     </div>
-                            </div>
                               <div class="fixed w-full px-4 z-10" style="top: 2vh;"></div>
                               <style>
                                 @keyframes fade {
