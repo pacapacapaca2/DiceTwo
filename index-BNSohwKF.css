@@ -2344,20 +2344,19 @@ input[type="number"] {
 
 
 #dice-container {
-    position: absolute; /* Позиционирование, как у кнопки */
-    bottom: 80px; /* Совпадает с bottom у кнопки */
-    display: none;
-    margin-top: 20px;
+  position: absolute;
+  bottom: 80px;
+  display: none;
+  flex-direction: row; /* Располагаем кубики в строку */
+  gap: 20px; /* Расстояние между кубиками */
 }
 
 .dice {
-    width: 80px; /* Уменьшен размер кубика */
-    height: 80px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    animation: spin 2s infinite linear;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 
