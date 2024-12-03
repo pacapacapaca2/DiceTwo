@@ -2313,6 +2313,64 @@ input[type="number"] {
   }
 }
 
+#result {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 2rem; /* Увеличен размер шрифта */
+    color: white;
+}
 
+#app {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Центрирование содержимого */
+    align-items: center;
+}
+
+#roll-button {
+    position: fixed;
+    bottom: 20px;
+    background-color: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+    padding: 12px 24px; /* Увеличен размер кнопки */
+    border-radius: 50px; /* Скругленные углы */
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Легкая тень для кнопки */
+    transition: background-color 0.3s ease; /* Плавное изменение цвета */
+}
+
+#roll-button:hover {
+    background-color: var(--tg-theme-button-hover-color); /* Цвет кнопки при наведении */
+}
+
+#dice-container {
+    display: none;
+    margin-top: 20px;
+}
+
+.dice {
+    width: 80px; /* Уменьшен размер кубика */
+    height: 80px;
+    background-color: #333; /* Темный цвет для минимализма */
+    border-radius: 5px; /* Скругленные углы */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 1.5rem;
+    animation: spin 2s infinite linear;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
 
 
