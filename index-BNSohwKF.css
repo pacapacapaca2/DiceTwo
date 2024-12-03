@@ -2122,32 +2122,7 @@ body {
   top: 0;
   left: 0;
 }
-.roll-btn {
-  padding: 10px 20px;
-  font-size: 16px;
-  color: white;
-  background-color: #5288c1;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
 
-.roll-btn:hover {
-  background-color: #6ab2f2;
-}
-
-.result {
-  font-size: 24px;
-  font-weight: bold;
-  margin: 20px 0;
-  color: #f5f5f5;
-}
-
-.dice {
-  width: 100px;
-  height: 100px;
-  margin: auto;
-}
 h1 {
   font-size: 24px;
   font-weight: 400;
