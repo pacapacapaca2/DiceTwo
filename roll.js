@@ -4,6 +4,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const diceContainer = document.getElementById("dice-container");
   const dice = document.getElementById("dice");
 
+  if (!rollButton || !resultDiv || !diceContainer || !dice) {
+    console.error("One or more DOM elements not found.");
+    return;
+  }
+
   let currentAnimation = null; // Хранит текущую анимацию
 
   // Обработчик кнопки Roll
@@ -14,7 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Показываем контейнеры для кубика и результата
     resultDiv.style.display = "block";
     diceContainer.style.display = "block";
-
 
     const randomRoll = Math.floor(Math.random() * 6) + 1;
 
@@ -32,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
       renderer: "svg", // Используем SVG для рендеринга
       loop: false,     // Анимация проигрывается один раз
       autoplay: true,  // Автозапуск анимации
-      path: `dice${randomRoll}.tgs` // Путь к файлу анимации
+      path: `animations/dice${randomRoll}.json` // Путь к JSON-файлу
     });
   });
 });
