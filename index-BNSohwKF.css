@@ -2330,7 +2330,7 @@ input[type="number"] {
 
 #roll-button {
     position: fixed;
-    bottom: 20px;
+    bottom: 0px;
     background-color: var(--tg-theme-button-color);
     color: var(--tg-theme-button-text-color);
     padding: 12px 24px; /* Увеличен размер кнопки */
@@ -2342,9 +2342,6 @@ input[type="number"] {
     transition: background-color 0.3s ease; /* Плавное изменение цвета */
 }
 
-#roll-button:hover {
-    background-color: var(--tg-theme-button-hover-color); /* Цвет кнопки при наведении */
-}
 
 #dice-container {
     display: none;
