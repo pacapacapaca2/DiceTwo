@@ -1,20 +1,10 @@
-document.addEventListener("DOMContentLoaded", () => { 
+document.addEventListener("DOMContentLoaded", () => {
   const rollButton = document.getElementById("roll-button");
   const resultDiv = document.getElementById("result");
   const diceContainer = document.getElementById("dice-container");
   const dice = document.getElementById("dice");
 
-  // Подключение анимаций через lottie-web
-  const diceAnimations = [];
-  for (let i = 1; i <= 6; i++) {
-    diceAnimations[i] = lottie.loadAnimation({
-      container: dice, // Контейнер для анимации
-      renderer: "svg", // Используем SVG для рендеринга
-      loop: false,     // Анимация проигрывается один раз
-      autoplay: false, // Запуск вручную
-      path: dice${i}.tgs // Путь к файлу анимации
-    });
-  }
+  let currentAnimation = null; // Хранит текущую анимацию
 
   // Обработчик кнопки Roll
   rollButton.addEventListener("click", () => {
@@ -29,12 +19,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const randomRoll = Math.floor(Math.random() * 6) + 1;
 
     // Обновляем текст результата
-    resultDiv.textContent = Result: ${randomRoll};
+    resultDiv.textContent = `Result: ${randomRoll}`;
 
-    // Останавливаем все предыдущие анимации
-    diceAnimations.forEach((anim) => anim?.stop());
+    // Удаляем предыдущую анимацию, если она есть
+    if (currentAnimation) {
+      currentAnimation.destroy();
+    }
 
-    // Запускаем анимацию выбранного кубика
-    diceAnimations[randomRoll]?.play();
+    // Загружаем и воспроизводим новую анимацию
+    currentAnimation = lottie.loadAnimation({
+      container: dice, // Контейнер для анимации
+      renderer: "svg", // Используем SVG для рендеринга
+      loop: false,     // Анимация проигрывается один раз
+      autoplay: true,  // Автозапуск анимации
+      path: `dice${randomRoll}.tgs` // Путь к файлу анимации
+    });
   });
 });
