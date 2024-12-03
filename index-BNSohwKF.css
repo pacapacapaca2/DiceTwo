@@ -2311,13 +2311,7 @@ input[type="number"] {
     --pseudo-element-display: none;
   }
 }
-        #app {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-        }
+
 
         .roll-btn {
   padding: 10px 20px;
