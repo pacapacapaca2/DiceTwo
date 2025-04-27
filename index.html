@@ -45,184 +45,191 @@
     </style>
     <style>
         /* Стили для игрового поля и элементов */
-        #game-board {
+        #game-container {
             width: 100%;
-            max-width: 400px;
+            max-width: 480px;
             margin: 0 auto;
-            padding: 10px;
-            background-color: var(--tg-theme-secondary-bg-color);
-            border-radius: 10px;
-            position: relative;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        
-        .track {
-            background-color: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 15px;
-            position: relative;
-        }
-        
-        .player {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            transition: left 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 16px;
-            z-index: 2;
-        }
-        
-        .player-you {
-            background-color: #5288c1;
-            color: white;
-        }
-        
-        .player-opponent1 {
-            background-color: #e67e22;
-            color: white;
-        }
-        
-        .player-opponent2 {
-            background-color: #2ecc71;
-            color: white;
-        }
-        
-        .task-card {
-            background-color: var(--tg-theme-secondary-bg-color);
-            border-radius: 8px;
             padding: 15px;
-            margin-top: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            display: none;
         }
         
-        .task-card h3 {
-            margin-top: 0;
-            margin-bottom: 10px;
-            color: var(--tg-theme-link-color);
-        }
-        
-        .leaderboard {
-            display: flex;
-            flex-direction: column;
-            padding: 10px;
-            background-color: rgba(35, 46, 60, 0.5);
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-        
-        .leaderboard-title {
+        .game-header {
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .game-title {
+            font-size: 24px;
             font-weight: bold;
+            margin-bottom: 5px;
             color: var(--tg-theme-link-color);
         }
         
-        .leaderboard-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 5px 10px;
-            border-radius: 4px;
+        .game-subtitle {
+            color: var(--tg-theme-hint-color);
+            font-size: 14px;
+            margin-top: 0;
         }
         
-        .leaderboard-item:nth-child(even) {
-            background-color: rgba(0, 0, 0, 0.1);
+        .dice-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 150px;
+            margin: 20px 0;
+            position: relative;
         }
         
         #dice-container {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin: 20px 0;
+            gap: 20px;
+            width: 100%;
         }
         
         .dice {
-            width: 60px;
-            height: 60px;
-            background-color: rgba(35, 46, 60, 0.8);
-            border-radius: 8px;
+            width: 80px;
+            height: 80px;
+            background-color: var(--tg-theme-secondary-bg-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+        
+        #result {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--tg-theme-link-color);
+            margin: 15px 0;
+            min-height: 30px;
+            transition: opacity 0.3s;
+        }
+        
+        .player-progress {
+            background-color: var(--tg-theme-secondary-bg-color);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .progress-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .progress-label {
+            font-weight: bold;
+            color: var(--tg-theme-text-color);
+        }
+        
+        .progress-value {
+            color: var(--tg-theme-link-color);
+            font-weight: bold;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            position: absolute;
+            height: 100%;
+            background-color: var(--tg-theme-button-color);
+            border-radius: 5px;
+            left: 0;
+            top: 0;
+            transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background-color: var(--tg-theme-secondary-bg-color);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--tg-theme-link-color);
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color);
         }
         
         #roll-button {
             background-color: var(--tg-theme-button-color);
             color: var(--tg-theme-button-text-color);
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 16px;
             font-weight: bold;
-            padding: 12px 24px;
+            padding: 14px 24px;
             margin: 15px auto;
             display: block;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: transform 0.2s, background 0.2s;
+            width: 100%;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(82, 136, 193, 0.3);
         }
         
         #roll-button:hover {
             background-color: #4477aa;
+            transform: translateY(-2px);
         }
         
-        .position-marker {
-            position: absolute;
-            width: 100%;
-            height: 2px;
-            background-color: rgba(255, 255, 255, 0.1);
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 1;
+        #roll-button:active {
+            transform: translateY(1px);
         }
         
-        .position-marker::after {
-            content: attr(data-position);
-            position: absolute;
-            top: -15px;
-            right: -5px;
-            color: var(--tg-theme-hint-color);
-            font-size: 10px;
-        }
-        
-        #result {
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
+        .bonus-tag {
+            background-color: rgba(82, 136, 193, 0.2);
             color: var(--tg-theme-link-color);
-            margin: 15px 0;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-left: 8px;
+            display: inline-block;
         }
         
-        .center-text {
-            text-align: center;
-        }
-        
-        .game-info {
+        .daily-challenge {
+            background-color: var(--tg-theme-secondary-bg-color);
+            border-radius: 12px;
             padding: 15px;
-            border-radius: 8px;
-            background-color: rgba(35, 46, 60, 0.5);
             margin: 15px 0;
+            border-left: 4px solid var(--tg-theme-link-color);
+            display: none;
         }
         
-        .game-info h2 {
-            margin-top: 0;
-            margin-bottom: 10px;
-            color: var(--tg-theme-link-color);
-        }
-        
-        .player-info {
+        .challenge-header {
             display: flex;
             align-items: center;
             margin-bottom: 10px;
         }
         
-        .player-avatar {
-            width: 30px;
-            height: 30px;
+        .challenge-icon {
+            width: 24px;
+            height: 24px;
+            background-color: var(--tg-theme-link-color);
             border-radius: 50%;
             margin-right: 10px;
             display: flex;
@@ -230,6 +237,69 @@
             justify-content: center;
             color: white;
             font-weight: bold;
+        }
+        
+        .challenge-title {
+            font-weight: bold;
+            color: var(--tg-theme-text-color);
+        }
+        
+        .challenge-description {
+            color: var(--tg-theme-subtitle-text-color);
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .challenge-action {
+            background-color: transparent;
+            color: var(--tg-theme-link-color);
+            border: 1px solid var(--tg-theme-link-color);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .animation-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-80px); opacity: 0; }
+        }
+        
+        .points-animation {
+            position: absolute;
+            animation: floatUp 1.5s forwards;
+            font-weight: bold;
+            color: var(--tg-theme-link-color);
+            font-size: 18px;
+        }
+        
+        .streak-count {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        
+        .streak-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--tg-theme-hint-color);
+        }
+        
+        .streak-dot.active {
+            background-color: var(--tg-theme-link-color);
         }
     </style>
 </head>
@@ -241,72 +311,67 @@
                     <div class="tg-secondary-bg">
                         <div class="min-page-content-height">
                          <div id="app">
-                            <div class="game-info">
-                                <h2 class="center-text">Гонка Кубиков</h2>
-                                <p class="center-text">Бросай кубики и продвигайся вперед! Опережай соперников и выполняй задания для дополнительных бросков.</p>
+                            <div id="game-container">
+                                <div class="game-header">
+                                    <h1 class="game-title">Dice Challenge</h1>
+                                    <p class="game-subtitle">Бросай кубики и собирай звёзды</p>
+                                </div>
                                 
-                                <div class="leaderboard">
-                                    <div class="leaderboard-title">Лидеры</div>
-                                    <div class="leaderboard-item">
-                                        <div class="player-info">
-                                            <div class="player-avatar" style="background-color: #5288c1;">Я</div>
-                                            <span>Вы</span>
-                                        </div>
-                                        <span>0</span>
+                                <div class="player-progress">
+                                    <div class="progress-title">
+                                        <span class="progress-label">Уровень</span>
+                                        <span class="progress-value">3</span>
                                     </div>
-                                    <div class="leaderboard-item">
-                                        <div class="player-info">
-                                            <div class="player-avatar" style="background-color: #e67e22;">А</div>
-                                            <span>Алексей</span>
-                                        </div>
-                                        <span>5</span>
-                                    </div>
-                                    <div class="leaderboard-item">
-                                        <div class="player-info">
-                                            <div class="player-avatar" style="background-color: #2ecc71;">М</div>
-                                            <span>Мария</span>
-                                        </div>
-                                        <span>3</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 60%;"></div>
                                     </div>
                                 </div>
-                            </div>
-                            
-                            <div id="game-board">
-                                <div class="track" id="your-track">
-                                    <div class="player player-you">Я</div>
-                                    <div class="position-marker" style="left: 20%" data-position="5"></div>
-                                    <div class="position-marker" style="left: 40%" data-position="10"></div>
-                                    <div class="position-marker" style="left: 60%" data-position="15"></div>
-                                    <div class="position-marker" style="left: 80%" data-position="20"></div>
+                                
+                                <div class="stats-grid">
+                                    <div class="stat-card">
+                                        <div class="stat-value">24</div>
+                                        <div class="stat-label">Броски</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-value">12</div>
+                                        <div class="stat-label">Лучший</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-value">★ 32</div>
+                                        <div class="stat-label">Звёзды</div>
+                                    </div>
                                 </div>
-                                <div class="track" id="opponent1-track">
-                                    <div class="player player-opponent1">А</div>
-                                    <div class="position-marker" style="left: 20%" data-position="5"></div>
-                                    <div class="position-marker" style="left: 40%" data-position="10"></div>
-                                    <div class="position-marker" style="left: 60%" data-position="15"></div>
-                                    <div class="position-marker" style="left: 80%" data-position="20"></div>
+                                
+                                <div class="dice-wrapper">
+                                    <div id="dice-container" style="display: none;">
+                                        <div id="dice1" class="dice"></div>
+                                        <div id="dice2" class="dice"></div>
+                                    </div>
+                                    <div class="animation-container" id="animation-container"></div>
                                 </div>
-                                <div class="track" id="opponent2-track">
-                                    <div class="player player-opponent2">М</div>
-                                    <div class="position-marker" style="left: 20%" data-position="5"></div>
-                                    <div class="position-marker" style="left: 40%" data-position="10"></div>
-                                    <div class="position-marker" style="left: 60%" data-position="15"></div>
-                                    <div class="position-marker" style="left: 80%" data-position="20"></div>
+                                
+                                <div id="result" style="display: none;">Начни игру!</div>
+                                
+                                <button id="roll-button">Бросить кубики</button>
+                                
+                                <div class="streak-count">
+                                    <div class="streak-dot active"></div>
+                                    <div class="streak-dot active"></div>
+                                    <div class="streak-dot"></div>
+                                    <div class="streak-dot"></div>
+                                    <div class="streak-dot"></div>
                                 </div>
-                            </div>
-                            
-                            <div id="result" style="display: none;">Result: </div>
-                            <button id="roll-button" class="center-btn">Бросить кубики</button>
-                            <div id="dice-container" style="display: none;">
-                              <div id="dice1" class="dice"></div>
-                              <div id="dice2" class="dice"></div>
-                            </div>
-                            
-                            <div class="task-card" id="task-card">
-                              <h3>Ежедневное задание</h3>
-                              <p>Добавьте 3 новых пользователя через пригласительную ссылку и получите +2 дополнительных броска!</p>
-                              <button id="task-button" class="center-btn" style="background-color: var(--tg-theme-button-color); color: var(--tg-theme-button-text-color); border: none; border-radius: 8px; padding: 8px 16px; margin-top: 10px;">Перейти к заданию</button>
-                            </div>
+                                
+                                <div class="daily-challenge" id="daily-challenge">
+                                    <div class="challenge-header">
+                                        <div class="challenge-icon">!</div>
+                                        <div class="challenge-title">Ежедневное задание</div>
+                                    </div>
+                                    <div class="challenge-description">
+                                        Пригласи друга и получи 2 дополнительных броска сегодня!
+                                    </div>
+                                    <button class="challenge-action" id="challenge-button">Пригласить друга</button>
+                                </div>
                             </div>
                             <style>
                                 @keyframes fadeBottomInUpAlert {

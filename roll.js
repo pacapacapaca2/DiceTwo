@@ -1,15 +1,18 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // Получаем элементы DOM
   const rollButton = document.getElementById("roll-button");
   const resultDiv = document.getElementById("result");
   const diceContainer = document.getElementById("dice-container");
   const dice1 = document.getElementById("dice1");
   const dice2 = document.getElementById("dice2");
-  const yourTrack = document.getElementById("your-track");
-  const opponent1Track = document.getElementById("opponent1-track");
-  const opponent2Track = document.getElementById("opponent2-track");
-  const taskCard = document.getElementById("task-card");
-  const taskButton = document.getElementById("task-button");
+  const dailyChallenge = document.getElementById("daily-challenge");
+  const challengeButton = document.getElementById("challenge-button");
+  const animationContainer = document.getElementById("animation-container");
+  const streakDots = document.querySelectorAll(".streak-dot");
   const loader = document.querySelector('.loader');
+  const progressFill = document.querySelector('.progress-fill');
+  const progressValue = document.querySelector('.progress-value');
+  const statValues = document.querySelectorAll('.stat-value');
 
   // Скрываем лоадер при загрузке страницы
   if (loader) {
@@ -17,107 +20,182 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Проверка наличия всех необходимых элементов
-  if (!rollButton || !resultDiv || !diceContainer || !dice1 || !dice2 || 
-      !yourTrack || !opponent1Track || !opponent2Track || !taskCard || !taskButton) {
+  if (!rollButton || !resultDiv || !diceContainer || !dice1 || !dice2) {
     console.error("One or more DOM elements not found.");
     return;
   }
 
-  // Инициализация игрового состояния
+  // Состояние игры
   const gameState = {
-    playerPosition: 0,
-    opponent1Position: 5, // Оппонент А уже находится на позиции 5
-    opponent2Position: 3, // Оппонент М уже находится на позиции 3
-    maxPosition: 25,
-    tasksCompleted: 0,
-    bonusRolls: 0,
-    playerName: "Вы"
+    rollCount: 24,
+    bestScore: 12,
+    stars: 32,
+    level: 3,
+    xp: 60, // процент до следующего уровня
+    streak: 2, // текущая серия бросков (дней подряд)
+    streakMax: 5, // максимальная серия
+    bonusRolls: 0, // бонусные броски
+    todayRolls: 0, // сколько бросков сделано сегодня
+    maxDailyRolls: 3, // максимальное количество бросков в день
+    dailyChallengeCompleted: false,
+    history: [] // история бросков
   };
 
-  // Получаем ссылки на игроков на игровом поле
-  const playerYou = yourTrack.querySelector('.player-you');
-  const playerOpponent1 = opponent1Track.querySelector('.player-opponent1');
-  const playerOpponent2 = opponent2Track.querySelector('.player-opponent2');
+  // Функция для создания анимации очков
+  function createPointsAnimation(points) {
+    const pointsEl = document.createElement("div");
+    pointsEl.className = "points-animation";
+    pointsEl.textContent = points > 0 ? `+${points}` : points;
+    
+    // Случайная позиция в пределах контейнера
+    const x = Math.random() * 80 + 10; // от 10% до 90% ширины
+    const y = Math.random() * 30 + 35; // от 35% до 65% высоты
+    
+    pointsEl.style.left = `${x}%`;
+    pointsEl.style.top = `${y}%`;
+    
+    animationContainer.appendChild(pointsEl);
+    
+    // Удаляем элемент после завершения анимации
+    setTimeout(() => {
+      pointsEl.remove();
+    }, 1500);
+  }
 
-  // Функция для рендеринга положения игроков
-  function renderPlayerPositions() {
-    const trackWidth = yourTrack.clientWidth - 40; // Вычитаем ширину игрока
-    const percentPerStep = 100 / gameState.maxPosition;
+  // Функция для обновления пользовательского интерфейса
+  function updateUI() {
+    // Обновляем уровень и прогресс
+    if (progressValue) progressValue.textContent = gameState.level;
+    if (progressFill) progressFill.style.width = `${gameState.xp}%`;
     
-    // Устанавливаем положения игроков
-    playerYou.style.left = `${gameState.playerPosition * percentPerStep}%`;
-    playerOpponent1.style.left = `${gameState.opponent1Position * percentPerStep}%`;
-    playerOpponent2.style.left = `${gameState.opponent2Position * percentPerStep}%`;
-    
-    // Обновляем отображение очков в таблице лидеров
-    const leaderboardItems = document.querySelectorAll('.leaderboard-item span:last-child');
-    if (leaderboardItems && leaderboardItems.length >= 3) {
-      leaderboardItems[0].textContent = gameState.playerPosition;
-      leaderboardItems[1].textContent = gameState.opponent1Position;
-      leaderboardItems[2].textContent = gameState.opponent2Position;
+    // Обновляем статистику
+    if (statValues && statValues.length >= 3) {
+      statValues[0].textContent = gameState.rollCount;
+      statValues[1].textContent = gameState.bestScore;
+      statValues[2].textContent = `★ ${gameState.stars}`;
     }
     
-    // Проверяем, нужно ли показать задание
-    if (Math.random() > 0.65 && taskCard.style.display === 'none') {
-      taskCard.style.display = 'block';
+    // Обновляем индикатор серии
+    streakDots.forEach((dot, index) => {
+      dot.classList.toggle('active', index < gameState.streak);
+    });
+    
+    // Проверяем, нужно ли показать ежедневное задание
+    if (dailyChallenge && !gameState.dailyChallengeCompleted && gameState.todayRolls >= 1) {
+      dailyChallenge.style.display = "block";
+    }
+    
+    // Обновляем текст кнопки броска в зависимости от оставшихся бросков
+    const remainingRolls = gameState.maxDailyRolls - gameState.todayRolls + gameState.bonusRolls;
+    
+    if (remainingRolls <= 0) {
+      rollButton.textContent = "Все броски использованы";
+      rollButton.disabled = true;
+    } else if (gameState.bonusRolls > 0) {
+      rollButton.textContent = `Бросить кубики (${remainingRolls})`;
+    } else {
+      rollButton.textContent = `Бросить кубики (${remainingRolls})`;
     }
   }
 
-  // Инициализация начальных позиций
-  renderPlayerPositions();
+  // Функция для проверки броска и начисления очков
+  function evaluateRoll(roll1, roll2) {
+    const total = roll1 + roll2;
+    let points = total;
+    let message = `Выпало: ${total}`;
+    
+    // Двойные числа дают бонус
+    if (roll1 === roll2) {
+      points = total * 2;
+      message += ` (дубль! x2)`;
+      createPointsAnimation(points);
+    } else {
+      createPointsAnimation(points);
+    }
+    
+    // Особые комбинации
+    if (total === 7) {
+      points += 3;
+      message += " (+3 за счастливое число)";
+    } else if (total === 11) {
+      points += 5;
+      message += " (+5 за мощный бросок)";
+    } else if (total === 12) {
+      points += 7;
+      message += " (+7 за максимум)";
+    }
+    
+    // Обновляем статистику
+    gameState.todayRolls++;
+    gameState.rollCount++;
+    gameState.stars += points;
+    
+    if (total > gameState.bestScore) {
+      gameState.bestScore = total;
+    }
+    
+    // Обновляем XP
+    gameState.xp += points * 2;
+    if (gameState.xp >= 100) {
+      gameState.level++;
+      gameState.xp = gameState.xp - 100;
+      message += " (новый уровень!)";
+    }
+    
+    // Сохраняем в историю
+    gameState.history.push({
+      roll1: roll1,
+      roll2: roll2,
+      total: total,
+      points: points,
+      timestamp: new Date()
+    });
+    
+    return { points, message };
+  }
 
   // Хранит текущие анимации
   let currentAnimations = []; 
 
-  // Функция для проверки завершения игры
-  function checkGameEnd() {
-    if (gameState.playerPosition >= gameState.maxPosition) {
-      resultDiv.textContent = `Поздравляем! Вы победили с результатом ${gameState.playerPosition}!`;
+  // Обработчик нажатия на кнопку ежедневного задания
+  if (challengeButton) {
+    challengeButton.addEventListener("click", () => {
+      // Имитируем выполнение задания
+      gameState.bonusRolls += 2;
+      gameState.dailyChallengeCompleted = true;
+      dailyChallenge.style.display = "none";
+      
+      resultDiv.textContent = "Получено +2 дополнительных броска!";
       resultDiv.style.display = "block";
-      rollButton.disabled = true;
-      return true;
-    } else if (gameState.opponent1Position >= gameState.maxPosition) {
-      resultDiv.textContent = `Игрок Алексей победил с результатом ${gameState.opponent1Position}!`;
-      resultDiv.style.display = "block";
-      rollButton.disabled = true;
-      return true;
-    } else if (gameState.opponent2Position >= gameState.maxPosition) {
-      resultDiv.textContent = `Игрок Мария победила с результатом ${gameState.opponent2Position}!`;
-      resultDiv.style.display = "block";
-      rollButton.disabled = true;
-      return true;
-    }
-    return false;
+      
+      // Обновляем интерфейс
+      updateUI();
+      
+      // В реальной игре здесь будет открытие страницы приглашений
+      if (window.Telegram && window.Telegram.WebApp) {
+        // Можно добавить переход на страницу приглашений
+        console.log("Открываем страницу приглашений");
+      }
+    });
   }
-
-  // Обработчик кнопки для задания
-  taskButton.addEventListener("click", () => {
-    // В реальной игре здесь будет логика проверки выполнения задания
-    // Симулируем выполнение задания
-    gameState.bonusRolls += 2;
-    taskCard.style.display = 'none';
-    resultDiv.textContent = `Вы получили +2 дополнительных броска!`;
-    resultDiv.style.display = "block";
-    
-    // Перенаправляем на страницу с приглашениями
-    if (window.Telegram && window.Telegram.WebApp) {
-      // Здесь можно добавить навигацию внутри телеграм-приложения
-      console.log("Переход на страницу с приглашениями");
-    } else {
-      window.location.href = "/DiceTwo/deposit";
-    }
-  });
 
   // Обработчик нажатия на кнопку броска
   rollButton.addEventListener("click", () => {
-    // Проверяем, не завершена ли игра
-    if (checkGameEnd()) return;
+    // Проверяем доступные броски
+    if (gameState.todayRolls >= gameState.maxDailyRolls && gameState.bonusRolls <= 0) {
+      resultDiv.textContent = "Вы использовали все броски на сегодня";
+      resultDiv.style.display = "block";
+      return;
+    }
+    
+    // Если есть бонусные броски, используем их
+    if (gameState.todayRolls >= gameState.maxDailyRolls) {
+      gameState.bonusRolls--;
+    }
 
-    // Скрываем результат и кнопку
+    // Скрываем результат и показываем кубики
     rollButton.style.display = "none";
     resultDiv.style.display = "none";
-    
-    // Показываем контейнер для кубиков
     diceContainer.style.display = "flex";
 
     // Генерируем случайные числа для обоих кубиков
@@ -152,41 +230,34 @@ document.addEventListener("DOMContentLoaded", () => {
     const onComplete = () => {
       completedAnimations++;
       if (completedAnimations === 2) {
-        const totalResult = randomRoll1 + randomRoll2;
+        // Оцениваем бросок и получаем результаты
+        const { points, message } = evaluateRoll(randomRoll1, randomRoll2);
         
-        // Обновляем позицию игрока
-        gameState.playerPosition += totalResult;
-        
-        // Обновляем позиции оппонентов (с некоторой случайностью)
-        if (Math.random() > 0.5) {
-          gameState.opponent1Position += Math.floor(Math.random() * 4) + 1;
-        }
-        if (Math.random() > 0.6) {
-          gameState.opponent2Position += Math.floor(Math.random() * 3) + 1;
-        }
-        
-        // Рендерим позиции игроков
-        renderPlayerPositions();
+        // Обновляем интерфейс
+        updateUI();
         
         // Показываем результат
-        resultDiv.textContent = `Вы выбросили: ${totalResult} и продвинулись на ${totalResult} шагов`;
+        resultDiv.textContent = message;
         resultDiv.style.display = "block";
         
-        // Проверяем завершение игры
-        if (!checkGameEnd()) {
-          // Если игра не завершена, показываем кнопку для следующего броска
-          setTimeout(() => {
-            diceContainer.style.display = "none";
-            rollButton.style.display = "block";
-            rollButton.textContent = gameState.bonusRolls > 0 
-              ? `Бросить кубики (бонусные броски: ${gameState.bonusRolls})` 
-              : "Бросить кубики";
-          }, 1500);
-        }
+        // Через некоторое время скрываем кубики и показываем кнопку для следующего броска
+        setTimeout(() => {
+          diceContainer.style.display = "none";
+          rollButton.style.display = "block";
+          
+          // Если все броски использованы, обновляем состояние кнопки
+          if (gameState.todayRolls >= gameState.maxDailyRolls && gameState.bonusRolls <= 0) {
+            rollButton.disabled = true;
+            rollButton.textContent = "Все броски использованы";
+          }
+        }, 2000);
       }
     };
 
     animation1.addEventListener("complete", onComplete);
     animation2.addEventListener("complete", onComplete);
   });
+
+  // Инициализация интерфейса при загрузке
+  updateUI();
 });
