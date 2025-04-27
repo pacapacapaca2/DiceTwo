@@ -39,6 +39,79 @@
             ::-webkit-scrollbar-thumb { 	border-radius: 5px !important; 	border: 3px solid transparent !important; 	background-color: rgba(255, 255, 255, 0.32549) !important; 	
             background-clip: content-box !important; } ::-webkit-scrollbar-thumb:hover { 	background-color: rgba(255, 255, 255, 0.478431) !important; } 
     </style>
+    <style>
+        .games-container {
+            padding: 1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .game-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--tg-theme-text-color);
+            text-align: center;
+            margin-bottom: 1.5rem;
+            margin-top: 1rem;
+        }
+        .game-button {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-radius: 0.5rem;
+            background-color: var(--tg-theme-secondary-bg-color);
+            border: none;
+            cursor: pointer;
+            color: var(--tg-theme-text-color);
+            transition: background-color 0.2s, transform 0.1s;
+            text-align: left;
+            position: relative;
+        }
+        .game-button:active {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: scale(0.98);
+        }
+        .game-icon {
+            width: 32px;
+            height: 32px;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        .game-info {
+            flex-grow: 1;
+        }
+        .game-name {
+            font-weight: bold;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+        .game-description {
+            font-size: 0.8rem;
+            color: var(--tg-theme-hint-color);
+        }
+        .game-status {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            background-color: var(--tg-theme-link-color);
+            color: var(--tg-theme-button-text-color);
+        }
+        .game-status.hot {
+            background-color: #ff4d4d;
+        }
+        .game-status.new {
+            background-color: #4caf50;
+        }
+        .chevron-right {
+            width: 16px;
+            height: 16px;
+            margin-left: 0.5rem;
+        }
+    </style>
 </head>
 <body ontouchstart="" class="okxc-using-mouse tc-using-mouse" style="top: auto;">
     <div id="root">
@@ -47,60 +120,118 @@
                 <div class="content-scroll tg-secondary-bg">
                     <div class="tg-secondary-bg">
                         <div class="min-page-content-height">
-                            <style>
-                                @keyframes fadeBottomInUpAlert {
-                                  0% {
-                                    transform: translateY(100%);
-                                    opacity: 0;
-                                  }
-                                  100% {
-                                    transform: translateY(0%);
-                                    opacity: 1;
-                                  }
-                                }
-                                @keyframes fadeBottomOutDownAlert {
-                                  0% {
-                                    transform: translateY(0%);
-                                    opacity: 1;
-                                  }
-                                  100% {
-                                    transform: translateY(100%);
-                                    opacity: 0;
-                                  }
-                                }
-                                @keyframes fadeTopInUpAlert {
-                                  0% {
-                                    transform: translateY(-100%);
-                                    opacity: 0;
-                                  }
-                                  100% {
-                                    transform: translateY(0%);
-                                    opacity: 1;
-                                  }
-                                }
-                                @keyframes fadeTopOutDownAlert {
-                                  0% {
-                                    transform: translateY(0%);
-                                    opacity: 1;
-                                  }
-                                  100% {
-                                    transform: translateY(-100%);
-                                    opacity: 0;
-                                  }
-                                }
-                              </style>
-                              <div class="fixed w-full px-4 z-10" style="top: 2vh;"></div>
-                              <style>
-                                @keyframes fade {
-                                  50% {
-                                    opacity: 0.3;
-                                  }
-                                  100% {
-                                    opacity: 1;
-                                  }
-                                }
-                              </style>
-                              <div class="fixed flex z-10 gap-0.5 justify-center w-full items-center mx-auto tg-secondary-bg py-2  loader tg-border-bottom fadeInUp"><div class="relative" style="width: 18px; height: 18px; top: 6px; left: 6px;"><span style="position: absolute; width: 2px; height: 5px; margin: 0px; background-color: var(--text-color); border-radius: 10px; animation: 2s ease-in-out 0s infinite normal none running fade; top: 4.09091px; left: -4.09091px; transform: rotate(45deg);"></span><span style="position: absolute; width: 2px; height: 5px; margin: 0px; background-color: var(--text-color); border-radius: 10px; animation: 2s ease-in-out 0.2s infinite normal none running fade; top: 0px; left: -6px; transform: rotate(90deg);"></span><span style="position: absolute; width: 2px; height: 5px; margin: 0px; background-color: var(--text-color); border-radius: 10px; animation: 2s ease-in-out 0.4s infinite normal none running fade; top: -4.09091px; left: -4.09091px; transform: rotate(-45deg);"></span><span style="position: absolute; width: 2px; height: 5px; margin: 0px; background-color: var(--text-color); border-radius: 10px; animation: 2s ease-in-out 0.6s infinite normal none running fade; top: -6px; left: 0px;"></span><span style="position: absolute; width: 2px; height: 5px; margin: 0px; background-color: var(--text-color); border-radius: 10px; animation: 2s ease-in-out 0.8s infinite normal none running fade; top: -4.09091px; left: 4.09091px; transform: rotate(45deg);"></span><span style="position: absolute; width: 2px; height: 5px; margin: 0px; background-color: var(--text-color); border-radius: 10px; animation: 2s ease-in-out 1s infinite normal none running fade; top: 0px; left: 6px; transform: rotate(90deg);"></span><span style="position: absolute; width: 2px; height: 5px; margin: 0px; background-color: var(--text-color); border-radius: 10px; animation: 2s ease-in-out 1.2s infinite normal none running fade; top: 4.09091px; left: 4.09091px; transform: rotate(-45deg);"></span><span style="position: absolute; width: 2px; height: 5px; margin: 0px; background-color: var(--text-color); border-radius: 10px; animation: 2s ease-in-out 1.4s infinite normal none running fade; top: 6px; left: 0px;"></span></div><p class="text-sm">Updating</p></div>
+                           <div class="games-container">
+                               <h1 class="game-title">Игры с кубиками</h1>
+                               
+                               <button class="game-button" data-game="yahtzee">
+                                   <div class="game-icon">
+                                       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                           <rect width="24" height="24" rx="4" fill="#5288c1"/>
+                                           <circle cx="7" cy="7" r="2" fill="white"/>
+                                           <circle cx="7" cy="17" r="2" fill="white"/>
+                                           <circle cx="12" cy="12" r="2" fill="white"/>
+                                           <circle cx="17" cy="7" r="2" fill="white"/>
+                                           <circle cx="17" cy="17" r="2" fill="white"/>
+                                       </svg>
+                                   </div>
+                                   <div class="game-info">
+                                       <div class="game-name">Yahtzee</div>
+                                       <div class="game-description">Собирайте комбинации кубиков для победы</div>
+                                   </div>
+                                   <div class="game-status hot">🔥 Горячая</div>
+                                   <svg class="chevron-right" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                       <path d="M9 18L15 12L9 6" stroke="var(--tg-theme-hint-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                   </svg>
+                               </button>
+                               
+                               <button class="game-button" data-game="craps">
+                                   <div class="game-icon">
+                                       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                           <rect width="24" height="24" rx="4" fill="#5288c1"/>
+                                           <circle cx="8" cy="8" r="2" fill="white"/>
+                                           <circle cx="16" cy="16" r="2" fill="white"/>
+                                       </svg>
+                                   </div>
+                                   <div class="game-info">
+                                       <div class="game-name">Craps</div>
+                                       <div class="game-description">Делайте ставки и играйте по правилам казино</div>
+                                   </div>
+                                   <svg class="chevron-right" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                       <path d="M9 18L15 12L9 6" stroke="var(--tg-theme-hint-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                   </svg>
+                               </button>
+                               
+                               <button class="game-button" data-game="dice-duel">
+                                   <div class="game-icon">
+                                       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                           <rect width="10" height="10" x="2" y="7" rx="2" fill="#5288c1"/>
+                                           <rect width="10" height="10" x="12" y="7" rx="2" fill="#5288c1"/>
+                                           <circle cx="4.5" cy="9.5" r="1" fill="white"/>
+                                           <circle cx="9.5" cy="14.5" r="1" fill="white"/>
+                                           <circle cx="7" cy="12" r="1" fill="white"/>
+                                           <circle cx="14.5" cy="9.5" r="1" fill="white"/>
+                                           <circle cx="17" cy="12" r="1" fill="white"/>
+                                           <circle cx="19.5" cy="14.5" r="1" fill="white"/>
+                                       </svg>
+                                   </div>
+                                   <div class="game-info">
+                                       <div class="game-name">Дуэль кубиков</div>
+                                       <div class="game-description">Соревнуйтесь с друзьями за лучший результат</div>
+                                   </div>
+                                   <div class="game-status new">Новая</div>
+                                   <svg class="chevron-right" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                       <path d="M9 18L15 12L9 6" stroke="var(--tg-theme-hint-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                   </svg>
+                               </button>
+                               
+                               <button class="game-button" data-game="hot-dice">
+                                   <div class="game-icon">
+                                       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                           <rect width="24" height="24" rx="4" fill="#FF4D4D"/>
+                                           <circle cx="7" cy="7" r="2" fill="white"/>
+                                           <circle cx="7" cy="17" r="2" fill="white"/>
+                                           <circle cx="12" cy="12" r="2" fill="white"/>
+                                           <circle cx="17" cy="7" r="2" fill="white"/>
+                                           <circle cx="17" cy="17" r="2" fill="white"/>
+                                           <path d="M5 5L19 19" stroke="#FFCC00" stroke-width="1.5" stroke-linecap="round"/>
+                                           <path d="M19 5L5 19" stroke="#FFCC00" stroke-width="1.5" stroke-linecap="round"/>
+                                       </svg>
+                                   </div>
+                                   <div class="game-info">
+                                       <div class="game-name">Горячие кубики</div>
+                                       <div class="game-description">Особые правила и высокие множители</div>
+                                   </div>
+                                   <div class="game-status hot">🔥 Горячая</div>
+                                   <svg class="chevron-right" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                       <path d="M9 18L15 12L9 6" stroke="var(--tg-theme-hint-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                   </svg>
+                               </button>
+                               
+                               <button class="game-button" data-game="dice-tower">
+                                   <div class="game-icon">
+                                       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                           <rect width="8" height="8" x="8" y="2" rx="2" fill="#5288c1"/>
+                                           <rect width="8" height="8" x="3" y="12" rx="2" fill="#5288c1"/>
+                                           <rect width="8" height="8" x="13" y="12" rx="2" fill="#5288c1"/>
+                                           <circle cx="10" cy="4" r="1" fill="white"/>
+                                           <circle cx="14" cy="8" r="1" fill="white"/>
+                                           <circle cx="5" cy="14" r="1" fill="white"/>
+                                           <circle cx="5" cy="18" r="1" fill="white"/>
+                                           <circle cx="9" cy="14" r="1" fill="white"/>
+                                           <circle cx="9" cy="18" r="1" fill="white"/>
+                                           <circle cx="15" cy="16" r="1" fill="white"/>
+                                           <circle cx="19" cy="16" r="1" fill="white"/>
+                                       </svg>
+                                   </div>
+                                   <div class="game-info">
+                                       <div class="game-name">Башня кубиков</div>
+                                       <div class="game-description">Стройте башню из кубиков и устанавливайте рекорды</div>
+                                   </div>
+                                   <svg class="chevron-right" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                       <path d="M9 18L15 12L9 6" stroke="var(--tg-theme-hint-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                   </svg>
+                               </button>
+                           </div>
                         </div>
                         <footer>
                             <a class="_link_lyone_12" href="/DiceTwo/earn">
@@ -171,5 +302,6 @@
    data-cf-beacon="{&quot;rayId&quot;:&quot;8eaa5f4a9bb6eeb6&quot;,&quot;serverTiming&quot;:{&quot;name&quot;:{&quot;cfExtPri&quot;:true,&quot;cfL4&quot;:true,&quot;cfSpeedBrain&quot;:true,&quot;cfCacheStatus&quot;:true}},&quot;version&quot;:&quot;2024.10.5&quot;,&quot;token&quot;:&quot;f69d3ea62cdf4c4bb149e92a5f06dad9&quot;}" 
    crossorigin="anonymous">
    </script>
+   <script src="games.js"></script>
 </body>
 </html>
