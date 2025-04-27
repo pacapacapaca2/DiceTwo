@@ -6,7 +6,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const dice1 = document.getElementById("dice1");
   const dice2 = document.getElementById("dice2");
   const animationContainer = document.getElementById("animation-container");
-  const streakDots = document.querySelectorAll(".streak-dot");
   const loader = document.querySelector('.loader');
   const progressFill = document.querySelector('.progress-fill');
   const progressValue = document.querySelector('.progress-value');
@@ -30,11 +29,9 @@ document.addEventListener("DOMContentLoaded", () => {
     stars: 32,
     level: 3,
     xp: 60, // процент до следующего уровня
-    streak: 2, // текущая серия бросков (дней подряд)
-    streakMax: 5, // максимальная серия
     bonusRolls: 0, // бонусные броски
     todayRolls: 0, // сколько бросков сделано сегодня
-    maxDailyRolls: 5, // максимальное количество бросков в день
+    maxDailyRolls: 999, // максимальное количество бросков (убираем ограничение)
     history: [] // история бросков
   };
 
@@ -72,20 +69,9 @@ document.addEventListener("DOMContentLoaded", () => {
       statValues[2].textContent = `★ ${gameState.stars}`;
     }
     
-    // Обновляем индикатор серии
-    streakDots.forEach((dot, index) => {
-      dot.classList.toggle('active', index < gameState.streak);
-    });
-    
-    // Обновляем текст кнопки броска в зависимости от оставшихся бросков
-    const remainingRolls = gameState.maxDailyRolls - gameState.todayRolls + gameState.bonusRolls;
-    
-    if (remainingRolls <= 0) {
-      rollButton.textContent = "Все броски использованы";
-      rollButton.disabled = true;
-    } else {
-      rollButton.textContent = `Бросить кубики (${remainingRolls})`;
-    }
+    // Обновляем текст кнопки броска без отображения ограничений
+    rollButton.textContent = "Бросить кубики";
+    rollButton.disabled = false;
   }
 
   // Функция для проверки броска и начисления очков
@@ -149,20 +135,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Обработчик нажатия на кнопку броска
   rollButton.addEventListener("click", () => {
-    // Проверяем доступные броски
-    if (gameState.todayRolls >= gameState.maxDailyRolls && gameState.bonusRolls <= 0) {
-      resultDiv.textContent = "Вы использовали все броски на сегодня";
-      resultDiv.style.display = "block";
-      return;
-    }
-    
-    // Если есть бонусные броски, используем их
-    if (gameState.todayRolls >= gameState.maxDailyRolls) {
-      gameState.bonusRolls--;
-    }
-
     // Скрываем результат и показываем кубики
-    rollButton.disabled = true;
+    rollButton.style.display = "none";
     resultDiv.style.display = "none";
     diceContainer.style.display = "flex";
 
@@ -208,17 +182,10 @@ document.addEventListener("DOMContentLoaded", () => {
         resultDiv.textContent = message;
         resultDiv.style.display = "block";
         
-        // Через некоторое время скрываем кубики и активируем кнопку снова
+        // Через некоторое время скрываем кубики и показываем кнопку для следующего броска
         setTimeout(() => {
           diceContainer.style.display = "none";
-          
-          // Если все броски использованы, обновляем состояние кнопки
-          if (gameState.todayRolls >= gameState.maxDailyRolls && gameState.bonusRolls <= 0) {
-            rollButton.disabled = true;
-            rollButton.textContent = "Все броски использованы";
-          } else {
-            rollButton.disabled = false;
-          }
+          rollButton.style.display = "block";
         }, 2000);
       }
     };

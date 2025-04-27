@@ -50,6 +50,7 @@
             max-width: 480px;
             margin: 0 auto;
             padding: 15px;
+            padding-bottom: 100px;
         }
         
         .game-header {
@@ -190,36 +191,19 @@
             width: 100%;
             max-width: 300px;
             box-shadow: 0 4px 12px rgba(82, 136, 193, 0.3);
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
         }
         
         #roll-button:hover {
             background-color: #4477aa;
-            transform: translateY(-2px);
         }
         
         #roll-button:active {
-            transform: translateY(1px);
-        }
-        
-        .fixed-roll-button {
-            position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
-            width: 90%;
-            max-width: 300px;
-        }
-        
-        .button-container {
-            height: 80px;
-            width: 100%;
-            margin-bottom: 60px;
-        }
-        
-        footer {
-            margin-top: 60px;
-            z-index: 90;
+            transform: translateX(-50%) translateY(2px);
         }
         
         .bonus-tag {
@@ -230,55 +214,6 @@
             font-size: 12px;
             margin-left: 8px;
             display: inline-block;
-        }
-        
-        .daily-challenge {
-            background-color: var(--tg-theme-secondary-bg-color);
-            border-radius: 12px;
-            padding: 15px;
-            margin: 15px 0;
-            border-left: 4px solid var(--tg-theme-link-color);
-            display: none;
-        }
-        
-        .challenge-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .challenge-icon {
-            width: 24px;
-            height: 24px;
-            background-color: var(--tg-theme-link-color);
-            border-radius: 50%;
-            margin-right: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-        }
-        
-        .challenge-title {
-            font-weight: bold;
-            color: var(--tg-theme-text-color);
-        }
-        
-        .challenge-description {
-            color: var(--tg-theme-subtitle-text-color);
-            font-size: 14px;
-            margin-bottom: 15px;
-        }
-        
-        .challenge-action {
-            background-color: transparent;
-            color: var(--tg-theme-link-color);
-            border: 1px solid var(--tg-theme-link-color);
-            border-radius: 8px;
-            padding: 8px 16px;
-            font-size: 14px;
-            cursor: pointer;
         }
         
         .animation-container {
@@ -302,25 +237,6 @@
             font-weight: bold;
             color: var(--tg-theme-link-color);
             font-size: 18px;
-        }
-        
-        .streak-count {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            margin-top: 5px;
-        }
-        
-        .streak-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: var(--tg-theme-hint-color);
-        }
-        
-        .streak-dot.active {
-            background-color: var(--tg-theme-link-color);
         }
     </style>
 </head>
@@ -362,11 +278,7 @@
                                         <div class="stat-label">Звёзды</div>
                                     </div>
                                 </div>
-
-                                <div class="button-container">
-                                    <button id="roll-button" class="fixed-roll-button">Бросить кубики</button>
-                                </div>
-
+                                
                                 <div class="dice-wrapper">
                                     <div id="dice-container" style="display: none;">
                                         <div id="dice1" class="dice"></div>
@@ -377,15 +289,8 @@
                                 
                                 <div id="result" style="display: none;">Начни игру!</div>
                                 
-                                <div class="streak-count">
-                                    <div class="streak-dot active"></div>
-                                    <div class="streak-dot active"></div>
-                                    <div class="streak-dot"></div>
-                                    <div class="streak-dot"></div>
-                                    <div class="streak-dot"></div>
-                                </div>
+                                <button id="roll-button">Бросить кубики</button>
                             </div>
-                            
                             <style>
                                 @keyframes fadeBottomInUpAlert {
                                   0% {
