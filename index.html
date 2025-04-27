@@ -43,6 +43,195 @@
             ::-webkit-scrollbar-thumb { 	border-radius: 5px !important; 	border: 3px solid transparent !important; 	background-color: rgba(255, 255, 255, 0.32549) !important; 	
             background-clip: content-box !important; } ::-webkit-scrollbar-thumb:hover { 	background-color: rgba(255, 255, 255, 0.478431) !important; } 
     </style>
+    <style>
+        /* Стили для игрового поля и элементов */
+        #game-board {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 10px;
+            background-color: var(--tg-theme-secondary-bg-color);
+            border-radius: 10px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .track {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .player {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: left 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            z-index: 2;
+        }
+        
+        .player-you {
+            background-color: #5288c1;
+            color: white;
+        }
+        
+        .player-opponent1 {
+            background-color: #e67e22;
+            color: white;
+        }
+        
+        .player-opponent2 {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .task-card {
+            background-color: var(--tg-theme-secondary-bg-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        
+        .task-card h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: var(--tg-theme-link-color);
+        }
+        
+        .leaderboard {
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            background-color: rgba(35, 46, 60, 0.5);
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .leaderboard-title {
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: var(--tg-theme-link-color);
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        
+        .leaderboard-item:nth-child(even) {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        #dice-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .dice {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(35, 46, 60, 0.8);
+            border-radius: 8px;
+        }
+        
+        #roll-button {
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 12px 24px;
+            margin: 15px auto;
+            display: block;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        #roll-button:hover {
+            background-color: #4477aa;
+        }
+        
+        .position-marker {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background-color: rgba(255, 255, 255, 0.1);
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+        
+        .position-marker::after {
+            content: attr(data-position);
+            position: absolute;
+            top: -15px;
+            right: -5px;
+            color: var(--tg-theme-hint-color);
+            font-size: 10px;
+        }
+        
+        #result {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--tg-theme-link-color);
+            margin: 15px 0;
+        }
+        
+        .center-text {
+            text-align: center;
+        }
+        
+        .game-info {
+            padding: 15px;
+            border-radius: 8px;
+            background-color: rgba(35, 46, 60, 0.5);
+            margin: 15px 0;
+        }
+        
+        .game-info h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: var(--tg-theme-link-color);
+        }
+        
+        .player-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .player-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body ontouchstart="" class="okxc-using-mouse tc-using-mouse" style="top: auto;">
     <div id="root">
@@ -52,11 +241,71 @@
                     <div class="tg-secondary-bg">
                         <div class="min-page-content-height">
                          <div id="app">
+                            <div class="game-info">
+                                <h2 class="center-text">Гонка Кубиков</h2>
+                                <p class="center-text">Бросай кубики и продвигайся вперед! Опережай соперников и выполняй задания для дополнительных бросков.</p>
+                                
+                                <div class="leaderboard">
+                                    <div class="leaderboard-title">Лидеры</div>
+                                    <div class="leaderboard-item">
+                                        <div class="player-info">
+                                            <div class="player-avatar" style="background-color: #5288c1;">Я</div>
+                                            <span>Вы</span>
+                                        </div>
+                                        <span>0</span>
+                                    </div>
+                                    <div class="leaderboard-item">
+                                        <div class="player-info">
+                                            <div class="player-avatar" style="background-color: #e67e22;">А</div>
+                                            <span>Алексей</span>
+                                        </div>
+                                        <span>5</span>
+                                    </div>
+                                    <div class="leaderboard-item">
+                                        <div class="player-info">
+                                            <div class="player-avatar" style="background-color: #2ecc71;">М</div>
+                                            <span>Мария</span>
+                                        </div>
+                                        <span>3</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="game-board">
+                                <div class="track" id="your-track">
+                                    <div class="player player-you">Я</div>
+                                    <div class="position-marker" style="left: 20%" data-position="5"></div>
+                                    <div class="position-marker" style="left: 40%" data-position="10"></div>
+                                    <div class="position-marker" style="left: 60%" data-position="15"></div>
+                                    <div class="position-marker" style="left: 80%" data-position="20"></div>
+                                </div>
+                                <div class="track" id="opponent1-track">
+                                    <div class="player player-opponent1">А</div>
+                                    <div class="position-marker" style="left: 20%" data-position="5"></div>
+                                    <div class="position-marker" style="left: 40%" data-position="10"></div>
+                                    <div class="position-marker" style="left: 60%" data-position="15"></div>
+                                    <div class="position-marker" style="left: 80%" data-position="20"></div>
+                                </div>
+                                <div class="track" id="opponent2-track">
+                                    <div class="player player-opponent2">М</div>
+                                    <div class="position-marker" style="left: 20%" data-position="5"></div>
+                                    <div class="position-marker" style="left: 40%" data-position="10"></div>
+                                    <div class="position-marker" style="left: 60%" data-position="15"></div>
+                                    <div class="position-marker" style="left: 80%" data-position="20"></div>
+                                </div>
+                            </div>
+                            
                             <div id="result" style="display: none;">Result: </div>
-                            <button id="roll-button" class="center-btn">Roll</button>
+                            <button id="roll-button" class="center-btn">Бросить кубики</button>
                             <div id="dice-container" style="display: none;">
                               <div id="dice1" class="dice"></div>
                               <div id="dice2" class="dice"></div>
+                            </div>
+                            
+                            <div class="task-card" id="task-card">
+                              <h3>Ежедневное задание</h3>
+                              <p>Добавьте 3 новых пользователя через пригласительную ссылку и получите +2 дополнительных броска!</p>
+                              <button id="task-button" class="center-btn" style="background-color: var(--tg-theme-button-color); color: var(--tg-theme-button-text-color); border: none; border-radius: 8px; padding: 8px 16px; margin-top: 10px;">Перейти к заданию</button>
                             </div>
                             </div>
                             <style>
