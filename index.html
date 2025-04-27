@@ -24,7 +24,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
 
     <link rel="stylesheet" crossorigin="" href="/DiceTwo/index-BNSohwKF.css">
-    <link rel="stylesheet" href="/DiceTwo/daily-tasks.css">
 
     <style> ::-webkit-scrollbar { 	border-radius: 5px !important; 	border: 3px solid transparent !important; 	background-color: rgba(255, 255, 255, 0.101961) !important; 	
         background-clip: content-box !important; 	width: 10px !important; } ::-webkit-scrollbar:hover { 	background-color: rgba(255, 255, 255, 0.172549) !important; } 
@@ -39,50 +38,10 @@
         BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', Arial, Tahoma, Verdana, sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-tap-highlight-color:transparent;}tc-root img
         {-webkit-user-select:none;-webkit-touch-callout:none;}tc-root *:focus{outline:#08f auto 2px;}tc-root li{list-style:none;}tc-root button{outline:none;}body.tc-disable-scroll{position:fixed;overflow-y:scroll;right:0;left:0;}body.tc-using-mouse tc-root *:focus{outline:none;}
     </style>
-    <style>
-      .content-scroll {
-        padding: 16px;
-      }
-      
-      #app {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        margin-top: 20px;
-        margin-bottom: 20px;
-      }
-      
-      .center-btn {
-        background: var(--tg-theme-button-color);
-        color: var(--tg-theme-button-text-color);
-        border: none;
-        border-radius: 8px;
-        padding: 12px 24px;
-        font-size: 16px;
-        font-weight: 510;
-        cursor: pointer;
-        margin: 20px 0;
-      }
-      
-      #dice-container {
-        display: flex;
-        gap: 20px;
-        margin-bottom: 20px;
-      }
-      
-      .dice {
-        width: 100px;
-        height: 100px;
-        background-size: contain;
-      }
-      
-      #result {
-        font-size: 18px;
-        font-weight: 590;
-        color: var(--tg-theme-text-color);
-        margin-bottom: 20px;
-      }
+    <style> ::-webkit-scrollbar { 	border-radius: 5px !important; 	border: 3px solid transparent !important; 	background-color: rgba(255, 255, 255, 0.101961) !important; 	
+            background-clip: content-box !important; 	width: 10px !important; } ::-webkit-scrollbar:hover { 	background-color: rgba(255, 255, 255, 0.172549) !important; } 
+            ::-webkit-scrollbar-thumb { 	border-radius: 5px !important; 	border: 3px solid transparent !important; 	background-color: rgba(255, 255, 255, 0.32549) !important; 	
+            background-clip: content-box !important; } ::-webkit-scrollbar-thumb:hover { 	background-color: rgba(255, 255, 255, 0.478431) !important; } 
     </style>
 </head>
 <body ontouchstart="" class="okxc-using-mouse tc-using-mouse" style="top: auto;">
@@ -93,13 +52,68 @@
                     <div class="tg-secondary-bg">
                         <div class="min-page-content-height">
                          <div id="app">
-                            <div id="result" style="display: none;">Результат: </div>
-                            <button id="roll-button" class="center-btn">Бросить кубики</button>
+                            <div id="result" style="display: none;">Result: </div>
+                            <button id="roll-button" class="center-btn">Roll</button>
                             <div id="dice-container" style="display: none;">
                               <div id="dice1" class="dice"></div>
                               <div id="dice2" class="dice"></div>
                             </div>
-                         </div>
+                            </div>
+                            <style>
+                                @keyframes fadeBottomInUpAlert {
+                                  0% {
+                                    transform: translateY(100%);
+                                    opacity: 0;
+                                  }
+                                  100% {
+                                    transform: translateY(0%);
+                                    opacity: 1;
+                                  }
+                                }
+                                @keyframes fadeBottomOutDownAlert {
+                                  0% {
+                                    transform: translateY(0%);
+                                    opacity: 1;
+                                  }
+                                  100% {
+                                    transform: translateY(100%);
+                                    opacity: 0;
+                                  }
+                                }
+                                @keyframes fadeTopInUpAlert {
+                                  0% {
+                                    transform: translateY(-100%);
+                                    opacity: 0;
+                                  }
+                                  100% {
+                                    transform: translateY(0%);
+                                    opacity: 1;
+                                  }
+                                }
+                                @keyframes fadeTopOutDownAlert {
+                                  0% {
+                                    transform: translateY(0%);
+                                    opacity: 1;
+                                  }
+                                  100% {
+                                    transform: translateY(-100%);
+                                    opacity: 0;
+                                  }
+                                }
+                              </style>
+                              <div class="fixed w-full px-4 z-10" style="top: 2vh;"></div>
+                              <style>
+                                @keyframes fade {
+                                  50% {
+                                    opacity: 0.3;
+                                  }
+                                  100% {
+                                    opacity: 1;
+                                  }
+                                }
+                              </style>
+                              <div class="fixed flex z-10 gap-0.5 justify-center w-full items-center mx-auto tg-secondary-bg py-2  loader tg-border-bottom fadeInUp"><div class="relative" style="width: 18px; height: 18px; top: 6px; left: 6px;"><span style="position: absolute; width: 2px; height: 5px; margin: 0px; background-color: var(--text-color); border-radius: 10px; animation: 2s ease-in-out 0s infinite normal none running fade; top: 4.09091px; left: -4.09091px; transform: rotate(45deg);"></span><span style="position: absolute; width: 2px; height: 5px; margin: 0px; background-color: var(--text-color); border-radius: 10px; animation: 2s ease-in-out 0.2s infinite normal none running fade; top: 0px; left: -6px; transform: rotate(90deg);"></span><span style="position: absolute; width: 2px; height: 5px; margin: 0px; background-color: var(--text-color); border-radius: 10px; animation: 2s ease-in-out 0.4s infinite normal none running fade; top: -4.09091px; left: -4.09091px; transform: rotate(-45deg);"></span><span style="position: absolute; width: 2px; height: 5px; margin: 0px; background-color: var(--text-color); border-radius: 10px; animation: 2s ease-in-out 0.6s infinite normal none running fade; top: -6px; left: 0px;"></span><span style="position: absolute; width: 2px; height: 5px; margin: 0px; background-color: var(--text-color); border-radius: 10px; animation: 2s ease-in-out 0.8s infinite normal none running fade; top: -4.09091px; left: 4.09091px; transform: rotate(45deg);"></span><span style="position: absolute; width: 2px; height: 5px; margin: 0px; background-color: var(--text-color); border-radius: 10px; animation: 2s ease-in-out 1s infinite normal none running fade; top: 0px; left: 6px; transform: rotate(90deg);"></span><span style="position: absolute; width: 2px; height: 5px; margin: 0px; background-color: var(--text-color); border-radius: 10px; animation: 2s ease-in-out 1.2s infinite normal none running fade; top: 4.09091px; left: 4.09091px; transform: rotate(-45deg);"></span><span style="position: absolute; width: 2px; height: 5px; margin: 0px; background-color: var(--text-color); border-radius: 10px; animation: 2s ease-in-out 1.4s infinite normal none running fade; top: 6px; left: 0px;"></span></div><p class="text-sm">Updating</p></div>
+                      
                         </div>
                      
                         <footer>
@@ -165,8 +179,13 @@
         </div>
     </div>
     
+    <!--<script defer="" 
+   src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" 
+   integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" 
+   data-cf-beacon="{&quot;rayId&quot;:&quot;8eaa5f4a9bb6eeb6&quot;,&quot;serverTiming&quot;:{&quot;name&quot;:{&quot;cfExtPri&quot;:true,&quot;cfL4&quot;:true,&quot;cfSpeedBrain&quot;:true,&quot;cfCacheStatus&quot;:true}},&quot;version&quot;:&quot;2024.10.5&quot;,&quot;token&quot;:&quot;f69d3ea62cdf4c4bb149e92a5f06dad9&quot;}" 
+   crossorigin="anonymous">
+   </script> -->
    <div id="okxton-widget-root"><okxc-root></okxc-root></div>
-   <script src="daily-tasks.js"></script>
    <script src="roll.js"></script>
  
 </body>
