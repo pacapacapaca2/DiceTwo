@@ -1,0 +1,36 @@
+#roll-button {
+    background-color: #FFC107;
+    border: none;
+    color: #2C3E50;
+    padding: 12px 0;
+    border-radius: 30px;
+    font-size: 18px;
+    font-weight: 600;
+    width: 100%;
+    max-width: 300px;
+    margin: 20px auto;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: block;
+}
+
+#roll-button:hover {
+    background-color: #FFD54F;
+    transform: scale(1.03);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+#roll-button:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Удаляем старые стили для фиксированной кнопки */
+.fixed-roll-button {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+} 
