@@ -135,8 +135,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Обработчик нажатия на кнопку броска
   rollButton.addEventListener("click", () => {
+    // Блокируем кнопку на время анимации
+    rollButton.disabled = true;
+    
     // Скрываем результат и показываем кубики
-    rollButton.style.display = "none";
     resultDiv.style.display = "none";
     diceContainer.style.display = "flex";
 
@@ -182,10 +184,10 @@ document.addEventListener("DOMContentLoaded", () => {
         resultDiv.textContent = message;
         resultDiv.style.display = "block";
         
-        // Через некоторое время скрываем кубики и показываем кнопку для следующего броска
+        // Через некоторое время скрываем кубики и разблокируем кнопку для следующего броска
         setTimeout(() => {
           diceContainer.style.display = "none";
-          rollButton.style.display = "block";
+          rollButton.disabled = false;
         }, 2000);
       }
     };
