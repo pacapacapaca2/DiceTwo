@@ -39,6 +39,83 @@
             ::-webkit-scrollbar-thumb { 	border-radius: 5px !important; 	border: 3px solid transparent !important; 	background-color: rgba(255, 255, 255, 0.32549) !important; 	
             background-clip: content-box !important; } ::-webkit-scrollbar-thumb:hover { 	background-color: rgba(255, 255, 255, 0.478431) !important; } 
     </style>
+    <style>
+        #profile-container {
+            padding: 2rem 1rem;
+        }
+        .text-xl {
+            font-size: 1.25rem;
+            line-height: 1.75rem;
+        }
+        .text-sm {
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
+        .font-bold {
+            font-weight: 700;
+        }
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+        .mb-6 {
+            margin-bottom: 1.5rem;
+        }
+        .w-24 {
+            width: 6rem;
+        }
+        .h-24 {
+            height: 6rem;
+        }
+        .w-full {
+            width: 100%;
+        }
+        .max-w-md {
+            max-width: 28rem;
+        }
+        .flex {
+            display: flex;
+        }
+        .flex-col {
+            flex-direction: column;
+        }
+        .items-center {
+            align-items: center;
+        }
+        .justify-center {
+            justify-content: center;
+        }
+        .justify-between {
+            justify-content: space-between;
+        }
+        .rounded-full {
+            border-radius: 9999px;
+        }
+        .rounded-lg {
+            border-radius: 0.5rem;
+        }
+        .overflow-hidden {
+            overflow: hidden;
+        }
+        .p-3 {
+            padding: 0.75rem;
+        }
+        .p-4 {
+            padding: 1rem;
+        }
+        .py-8 {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        .text-gray-400 {
+            color: var(--tg-theme-hint-color);
+        }
+        .bg-opacity-50 {
+            background-color: rgba(35, 46, 60, 0.5);
+        }
+    </style>
 </head>
 <body ontouchstart="" class="okxc-using-mouse tc-using-mouse" style="top: auto;">
     <div id="root">
@@ -47,6 +124,28 @@
                 <div class="content-scroll tg-secondary-bg">
                     <div class="tg-secondary-bg">
                         <div class="min-page-content-height">
+                            <div id="profile-container" class="flex flex-col items-center py-8">
+                                <div id="profile-photo" class="w-24 h-24 rounded-full bg-gray-700 mb-4 overflow-hidden">
+                                    <!-- Фото профиля будет загружено через JavaScript -->
+                                </div>
+                                <h2 id="profile-name" class="text-xl font-bold mb-2">Загрузка...</h2>
+                                <p id="profile-username" class="text-sm text-gray-400 mb-6">@username</p>
+                                
+                                <div class="w-full max-w-md p-4 bg-opacity-50 rounded-lg mb-6">
+                                    <div class="flex justify-between items-center mb-4 p-3 bg-[#232e3c] rounded-lg">
+                                        <span>Общее количество бросков</span>
+                                        <span id="total-rolls" class="font-bold">0</span>
+                                    </div>
+                                    <div class="flex justify-between items-center mb-4 p-3 bg-[#232e3c] rounded-lg">
+                                        <span>Лучший результат</span>
+                                        <span id="best-score" class="font-bold">0</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-[#232e3c] rounded-lg">
+                                        <span>Позиция в рейтинге</span>
+                                        <span id="rank" class="font-bold">-</span>
+                                    </div>
+                                </div>
+                            </div>
                             <style>
                                 @keyframes fadeBottomInUpAlert {
                                   0% {
@@ -171,5 +270,6 @@
    data-cf-beacon="{&quot;rayId&quot;:&quot;8eaa5f4a9bb6eeb6&quot;,&quot;serverTiming&quot;:{&quot;name&quot;:{&quot;cfExtPri&quot;:true,&quot;cfL4&quot;:true,&quot;cfSpeedBrain&quot;:true,&quot;cfCacheStatus&quot;:true}},&quot;version&quot;:&quot;2024.10.5&quot;,&quot;token&quot;:&quot;f69d3ea62cdf4c4bb149e92a5f06dad9&quot;}" 
    crossorigin="anonymous">
    </script>
+   <script src="profile.js"></script>
 </body>
 </html>
