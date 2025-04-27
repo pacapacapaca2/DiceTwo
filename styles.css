@@ -1,0 +1,30 @@
+.super-roll-btn {
+  background-color: #ff9900;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.super-roll-btn:hover {
+  background-color: #ffac33;
+}
+
+.super-roll-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.super-roll-stars {
+  margin-left: 8px;
+  font-size: 0.9rem;
+  color: #ffff00;
+} 

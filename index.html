@@ -220,16 +220,23 @@
             display: none;
         }
         
-        .challenge-header {
+        .daily-bonus {
+            background-color: var(--tg-theme-secondary-bg-color);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #e67e22;
+        }
+        
+        .challenge-header, .bonus-header {
             display: flex;
             align-items: center;
             margin-bottom: 10px;
         }
         
-        .challenge-icon {
+        .challenge-icon, .bonus-icon {
             width: 24px;
             height: 24px;
-            background-color: var(--tg-theme-link-color);
             border-radius: 50%;
             margin-right: 10px;
             display: flex;
@@ -239,12 +246,16 @@
             font-weight: bold;
         }
         
-        .challenge-title {
+        .bonus-icon {
+            background-color: #e67e22;
+        }
+        
+        .challenge-title, .bonus-title {
             font-weight: bold;
             color: var(--tg-theme-text-color);
         }
         
-        .challenge-description {
+        .challenge-description, .bonus-description {
             color: var(--tg-theme-subtitle-text-color);
             font-size: 14px;
             margin-bottom: 15px;
@@ -258,6 +269,40 @@
             padding: 8px 16px;
             font-size: 14px;
             cursor: pointer;
+        }
+        
+        .super-roll-btn {
+            background-color: #e67e22;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 12px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
+        }
+        
+        .super-roll-btn:hover {
+            background-color: #d35400;
+            transform: translateY(-2px);
+        }
+        
+        .super-roll-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .super-roll-stars {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 14px;
         }
         
         .animation-container {
@@ -362,15 +407,20 @@
                                     <div class="streak-dot"></div>
                                 </div>
                                 
-                                <div class="daily-challenge" id="daily-challenge">
-                                    <div class="challenge-header">
-                                        <div class="challenge-icon">!</div>
-                                        <div class="challenge-title">Ежедневное задание</div>
+                                <div class="daily-bonus" id="daily-bonus">
+                                    <div class="bonus-header">
+                                        <div class="bonus-icon">⭐</div>
+                                        <div class="bonus-title">Супер Бросок</div>
                                     </div>
-                                    <div class="challenge-description">
-                                        Пригласи друга и получи 2 дополнительных броска сегодня!
+                                    <div class="bonus-description">
+                                        Используйте 5 звезд, чтобы сделать особый бросок с двойной наградой!
                                     </div>
-                                    <button class="challenge-action" id="challenge-button">Пригласить друга</button>
+                                    <div class="bonus-action">
+                                        <button id="super-roll-button" class="super-roll-btn">
+                                            Супер Бросок
+                                            <span class="super-roll-stars">★ 5</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <style>
