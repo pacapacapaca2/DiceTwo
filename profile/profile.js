@@ -16,12 +16,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   console.log("Initializing profile page...");
   
-  // Проверка статуса кошелька
-  let walletConnected = false;
-  
   // Функция обновления статуса кошелька
   function updateWalletStatus(isConnected) {
-    walletConnected = isConnected;
     if (isConnected) {
       walletBadge.textContent = "Кошелёк подключен";
       walletBadge.parentElement.style.backgroundColor = "rgba(39, 174, 96, 0.3)";
@@ -30,6 +26,9 @@ document.addEventListener("DOMContentLoaded", () => {
       connectWalletBtn.style.opacity = "0.7";
       // Сохраняем состояние в localStorage
       localStorage.setItem("walletConnected", "true");
+      
+      // Показываем уведомление об успешном подключении
+      showConnectionNotification(true);
     } else {
       walletBadge.textContent = "Кошелёк не подключен";
       walletBadge.parentElement.style.backgroundColor = "rgba(82, 136, 193, 0.3)";
@@ -105,70 +104,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Обработчик нажатия на кнопку подключения кошелька
   connectWalletBtn.addEventListener("click", async () => {
-    if (walletConnected) return;
-    
     try {
-      if (window.Telegram && window.Telegram.WebApp) {
-        const tg = window.Telegram.WebApp;
-        
-        // Показываем сообщение о загрузке
-        connectWalletBtn.innerHTML = `
-          <div class="spinner" style="width: 20px; height: 20px; border: 2px solid; border-radius: 50%; border-color: white transparent white transparent; animation: spin 1s linear infinite;"></div>
-          Подключение...
-        `;
-        
-        // Анимация вращения для индикатора загрузки
-        const style = document.createElement('style');
-        style.textContent = `
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `;
-        document.head.appendChild(style);
-        
-        // Ожидаем небольшую задержку для имитации процесса подключения
-        setTimeout(() => {
-          // Вызываем API Telegram для открытия встроенного кошелька (если API недоступно, просто имитируем)
-          if (tg.showPopup) {
-            tg.showPopup({
-              title: "Подключение кошелька",
-              message: "Для подключения кошелька необходимо подтвердить действие",
-              buttons: [{type: "ok", text: "Подключить"}, {type: "cancel", text: "Отмена"}]
-            }, (buttonId) => {
-              if (buttonId === "ok") {
-                updateWalletStatus(true);
-                // Сохраняем состояние сразу после успешного подключения
-                localStorage.setItem("walletConnected", "true");
-                // Показываем уведомление об успешном подключении
-                showConnectionNotification(true);
-              } else {
-                connectWalletBtn.innerHTML = `
-                  <svg class="wallet-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M4 4C2.89543 4 2 4.89543 2 6V18C2 19.1046 2.89543 20 4 20H20C21.1046 20 22 19.1046 22 18V10C22 8.89543 21.1046 8 20 8H18V6C18 4.89543 17.1046 4 16 4H4ZM16 10H20V18H4V6H16V10ZM18 12C18.5523 12 19 12.4477 19 13C19 13.5523 18.5523 14 18 14C17.4477 14 17 13.5523 17 13C17 12.4477 17.4477 12 18 12Z"/>
-                  </svg>
-                  Подключить кошелёк Telegram
-                `;
-                // Показываем уведомление об отмене подключения
-                showConnectionNotification(false);
-              }
-            });
-          } else {
-            // Имитация успешного подключения, если API недоступно
-            updateWalletStatus(true);
-            // Сохраняем состояние
-            localStorage.setItem("walletConnected", "true");
-            // Показываем уведомление об успешном подключении
-            showConnectionNotification(true);
-          }
-        }, 1500);
+      // Проверяем, не подключен ли уже кошелек
+      const isConnected = await telegramWalletConnector.isWalletConnected();
+      if (isConnected) {
+        console.log("Кошелек уже подключен");
+        updateWalletStatus(true);
+        return;
+      }
+      
+      // Показываем сообщение о загрузке
+      connectWalletBtn.innerHTML = `
+        <div class="spinner" style="width: 20px; height: 20px; border: 2px solid; border-radius: 50%; border-color: white transparent white transparent; animation: spin 1s linear infinite;"></div>
+        Подключение...
+      `;
+      
+      // Анимация вращения для индикатора загрузки
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      // Подключаем кошелек с помощью нового коннектора
+      const connected = await telegramWalletConnector.connectWallet();
+      
+      if (connected) {
+        // Обновляем статус на "подключен"
+        updateWalletStatus(true);
       } else {
-        // Имитация подключения в режиме тестирования
-        setTimeout(() => {
-          updateWalletStatus(true);
-          // Показываем уведомление об успешном подключении
-          showConnectionNotification(true);
-        }, 1500);
+        // Возвращаем кнопку в исходное состояние
+        updateWalletStatus(false);
+        showConnectionNotification(false);
       }
     } catch (error) {
       console.error("Ошибка при подключении кошелька:", error);
@@ -180,9 +150,21 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
       
       // Показываем уведомление об ошибке
-      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
-        window.Telegram.WebApp.showAlert("Ошибка при подключении кошелька. Пожалуйста, попробуйте позже.");
-      }
+      showConnectionNotification(false);
+    }
+  });
+
+  // Подписываемся на событие изменения статуса кошелька
+  document.addEventListener('walletStatusChange', (event) => {
+    console.log('Получено событие изменения статуса кошелька:', event.detail);
+    
+    const walletInfo = event.detail;
+    if (walletInfo) {
+      // Кошелек подключен
+      updateWalletStatus(true);
+    } else {
+      // Кошелек отключен
+      updateWalletStatus(false);
     }
   });
 
@@ -198,12 +180,10 @@ document.addEventListener("DOMContentLoaded", () => {
     tg.BackButton.hide();
     
     // Настраиваем Telegram MainButton для альтернативного способа подключения кошелька
-    if (!walletConnected) {
+    if (!(localStorage.getItem("walletConnected") === "true")) {
       // Настраиваем основную кнопку Telegram как альтернативный способ подключения кошелька
       tg.MainButton.setText("Подключить кошелёк Telegram");
-      tg.MainButton.onClick(function() {
-        if (walletConnected) return;
-        
+      tg.MainButton.onClick(async function() {
         // Обновляем текст на кнопке подключения
         connectWalletBtn.innerHTML = `
           <div class="spinner" style="width: 20px; height: 20px; border: 2px solid; border-radius: 50%; border-color: white transparent white transparent; animation: spin 1s linear infinite;"></div>
@@ -213,12 +193,17 @@ document.addEventListener("DOMContentLoaded", () => {
         // Скрываем MainButton во время процесса подключения
         tg.MainButton.hide();
         
-        setTimeout(() => {
+        // Подключаем кошелек с помощью нового коннектора
+        const connected = await telegramWalletConnector.connectWallet();
+        
+        if (connected) {
+          // Обновляем статус на "подключен"
           updateWalletStatus(true);
-          localStorage.setItem("walletConnected", "true");
-          // Показываем уведомление об успешном подключении
-          showConnectionNotification(true);
-        }, 1500);
+        } else {
+          // Возвращаем кнопку в исходное состояние
+          updateWalletStatus(false);
+          tg.MainButton.show();
+        }
       });
       tg.MainButton.show();
     } else {
@@ -324,22 +309,18 @@ document.addEventListener("DOMContentLoaded", () => {
   bestScore.textContent = "12";
   rank.textContent = "42";
   
-  // Проверка состояния подключения кошелька (например, из localStorage)
-  const savedWalletStatus = localStorage.getItem("walletConnected");
-  if (savedWalletStatus === "true") {
-    updateWalletStatus(true);
+  // Проверка состояния подключения кошелька
+  telegramWalletConnector.isWalletConnected().then(isConnected => {
+    updateWalletStatus(isConnected);
     
-    // Скрываем MainButton, если кошелек уже подключен
+    // Скрываем/показываем MainButton в зависимости от состояния подключения
     if (window.Telegram && window.Telegram.WebApp) {
-      window.Telegram.WebApp.MainButton.hide();
+      if (isConnected) {
+        window.Telegram.WebApp.MainButton.hide();
+      } else {
+        window.Telegram.WebApp.MainButton.setText("Подключить кошелёк Telegram");
+        window.Telegram.WebApp.MainButton.show();
+      }
     }
-  } else {
-    updateWalletStatus(false);
-    
-    // Показываем MainButton, если кошелек не подключен
-    if (window.Telegram && window.Telegram.WebApp) {
-      window.Telegram.WebApp.MainButton.setText("Подключить кошелёк Telegram");
-      window.Telegram.WebApp.MainButton.show();
-    }
-  }
+  });
 }); 
