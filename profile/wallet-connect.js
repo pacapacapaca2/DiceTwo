@@ -2,7 +2,8 @@
 class TelegramWalletConnector {
   constructor() {
     this.isInitialized = false;
-    this.tonConnectManifestUrl = window.location.origin + '/tonconnect-manifest.json';
+    // Используем манифест с GitHub Pages вместо локального файла
+    this.tonConnectManifestUrl = 'https://raw.githubusercontent.com/tonconnect/tonconnect-manifest/main/sample-manifest.json';
     this.connector = null;
     this.dAppName = 'DiceTwo';
   }
@@ -21,6 +22,9 @@ class TelegramWalletConnector {
       this.connector = new window.TonConnect({
         manifestUrl: this.tonConnectManifestUrl
       });
+
+      // Выводим URL манифеста для отладки
+      console.log('Используется URL манифеста:', this.tonConnectManifestUrl);
 
       // Подписываемся на изменения статуса подключения
       this.connector.onStatusChange((walletInfo) => {
@@ -65,6 +69,7 @@ class TelegramWalletConnector {
 
       // Получаем список доступных кошельков
       const wallets = await this.connector.getWallets();
+      console.log('Доступные кошельки:', wallets);
       
       // Находим кошелек Telegram (TonKeeper) для подключения
       const tonkeeperWallet = wallets.find(wallet => 
@@ -77,6 +82,8 @@ class TelegramWalletConnector {
         console.error('Не найден подходящий TON кошелек');
         return false;
       }
+      
+      console.log('Выбран кошелек:', tonkeeperWallet);
       
       // Формируем ссылку для подключения и открываем её
       // Не используем openTonWallet, вместо этого используем стандартный метод TON Connect

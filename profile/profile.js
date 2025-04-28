@@ -128,11 +128,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // Функция подключения кошелька
   async function connectWallet() {
     try {
+      console.log("Начинаем процесс подключения кошелька");
+      
       // Проверяем, не подключен ли уже кошелек
       const isConnected = await telegramWalletConnector.isWalletConnected();
+      console.log("Текущий статус подключения кошелька:", isConnected);
+      
       if (isConnected) {
         console.log("Кошелек уже подключен");
         const address = telegramWalletConnector.getWalletAddress();
+        console.log("Адрес кошелька:", address);
         updateWalletStatus(true, address);
         return;
       }
@@ -154,12 +159,16 @@ document.addEventListener("DOMContentLoaded", () => {
       document.head.appendChild(style);
       
       // Подключаем кошелек через TON Connect
+      console.log("Вызываем метод connectWallet у telegramWalletConnector");
       const connected = await telegramWalletConnector.connectWallet();
+      console.log("Результат вызова connectWallet:", connected);
       
       if (connected) {
+        console.log("Соединение инициировано успешно, ожидаем ответа от TON Connect");
         // Индикатор загрузки остается, пока TON Connect не вернет результат подключения
         // Обработка статуса подключения происходит через событие walletStatusChange
       } else {
+        console.error("Не удалось инициировать подключение кошелька");
         // Возвращаем кнопку в исходное состояние в случае ошибки
         updateWalletStatus(false);
         showConnectionNotification(false);
