@@ -1,31 +1,44 @@
-// Интеграция с Telegram Wallet через TON Connect
+// Интеграция с TON Connect для Telegram Mini App
 class TelegramWalletConnector {
   constructor() {
     this.isInitialized = false;
     this.tonConnectManifestUrl = window.location.origin + '/tonconnect-manifest.json';
-    this.connectionState = null;
+    this.connector = null;
     this.dAppName = 'DiceTwo';
   }
 
   async initialize() {
-    if (this.isInitialized) return;
+    if (this.isInitialized) return true;
 
     try {
-      // Проверяем, доступен ли объект window.Telegram
-      if (!window.Telegram || !window.Telegram.WebApp) {
-        console.error('Telegram WebApp API не доступен');
+      // Проверяем, доступен ли TonConnect
+      if (!window.TonConnect) {
+        console.error('TON Connect SDK не доступен');
         return false;
       }
 
-      // Проверяем, поддерживает ли устройство TON Connect
-      const hasTonConnect = window.Telegram.WebApp.initDataUnsafe && 
-                          window.Telegram.WebApp.initDataUnsafe.user && 
-                          !!window.TonConnect;
-      
-      if (!hasTonConnect) {
-        console.warn('TON Connect не поддерживается или не инициализирован');
-      }
+      // Создаем экземпляр коннектора TON Connect
+      this.connector = new window.TonConnect({
+        manifestUrl: this.tonConnectManifestUrl
+      });
 
+      // Подписываемся на изменения статуса подключения
+      this.connector.onStatusChange((walletInfo) => {
+        console.log('Статус подключения TON Connect:', walletInfo);
+        
+        // Вызываем событие изменения статуса кошелька
+        const event = new CustomEvent('walletStatusChange', { 
+          detail: { connected: !!walletInfo, wallet: walletInfo } 
+        });
+        document.dispatchEvent(event);
+        
+        // Сохраняем состояние в localStorage
+        localStorage.setItem("walletConnected", walletInfo ? "true" : "false");
+      });
+      
+      // Восстанавливаем соединение, если оно было ранее
+      await this.connector.restoreConnection();
+      
       this.isInitialized = true;
       console.log('TelegramWalletConnector инициализирован');
       return true;
@@ -45,78 +58,41 @@ class TelegramWalletConnector {
     }
 
     try {
-      // Проверяем, доступен ли встроенный кошелек
-      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openTonWallet) {
-        console.log('Открываем встроенный TON Wallet');
-        
-        // Открываем встроенный кошелек 
-        window.Telegram.WebApp.openTonWallet({
-          callback_url: window.location.origin + window.location.pathname,
-        });
-        
+      if (this.connector.connected) {
+        console.log('Кошелек уже подключен');
         return true;
-      } else {
-        console.log('Встроенный TON Wallet не доступен, пробуем использовать TON Connect');
-        
-        // Если доступен TON Connect, используем его
-        if (window.TonConnect) {
-          // Создаем запрос на подключение через TON Connect
-          const connector = new window.TonConnect({
-            manifestUrl: this.tonConnectManifestUrl
-          });
-          
-          // Получаем список доступных кошельков
-          const wallets = await connector.getWallets();
-          
-          // Находим кошелек Telegram
-          const telegramWallet = wallets.find(wallet => 
-            wallet.name.toLowerCase() === 'telegram wallet' || 
-            wallet.appName.toLowerCase() === 'telegram-wallet'
-          );
-          
-          if (telegramWallet) {
-            // Формируем ссылку для подключения
-            const universalLink = connector.connect({
-              universalLink: telegramWallet.universalLink,
-              bridgeUrl: telegramWallet.bridgeUrl
-            });
-            
-            console.log('Ссылка для подключения TON Connect:', universalLink);
-            
-            // Подписываемся на изменения статуса подключения
-            connector.onStatusChange(walletInfo => {
-              this.connectionState = walletInfo;
-              console.log('Статус подключения:', walletInfo);
-              
-              // Вызываем событие изменения статуса кошелька
-              const event = new CustomEvent('walletStatusChange', { detail: walletInfo });
-              document.dispatchEvent(event);
-            });
-            
-            // Восстанавливаем соединение, если оно было ранее
-            connector.restoreConnection();
-            
-            // Если кошелек уже подключен, возвращаем true
-            if (connector.connected) {
-              console.log('Кошелек уже подключен:', connector.wallet);
-              return true;
-            }
-            
-            // Иначе открываем ссылку для подключения
-            window.location.href = universalLink;
-            return true;
-          } else {
-            console.warn('Кошелек Telegram не найден в списке доступных кошельков');
-          }
-        } else {
-          console.error('TON Connect не доступен');
-        }
       }
+
+      // Получаем список доступных кошельков
+      const wallets = await this.connector.getWallets();
+      
+      // Находим кошелек Telegram (TonKeeper) для подключения
+      const tonkeeperWallet = wallets.find(wallet => 
+        wallet.name === 'Tonkeeper' || 
+        wallet.name.toLowerCase().includes('ton') ||
+        wallet.name.toLowerCase().includes('keeper')
+      );
+      
+      if (!tonkeeperWallet) {
+        console.error('Не найден подходящий TON кошелек');
+        return false;
+      }
+      
+      // Формируем ссылку для подключения и открываем её
+      // Не используем openTonWallet, вместо этого используем стандартный метод TON Connect
+      const universalLink = this.connector.connect({
+        universalLink: tonkeeperWallet.universalLink,
+        bridgeUrl: tonkeeperWallet.bridgeUrl
+      });
+      
+      console.log('Открываем ссылку для подключения:', universalLink);
+      window.location.href = universalLink;
+      
+      return true;
     } catch (error) {
       console.error('Ошибка при подключении кошелька:', error);
+      return false;
     }
-    
-    return false;
   }
 
   // Проверяет, подключен ли кошелек
@@ -125,28 +101,7 @@ class TelegramWalletConnector {
       await this.initialize();
     }
     
-    try {
-      // Проверяем наличие данных о подключении в localStorage
-      const savedWalletStatus = localStorage.getItem("walletConnected");
-      if (savedWalletStatus === "true") {
-        return true;
-      }
-      
-      // Если используется TON Connect, проверяем состояние подключения
-      if (window.TonConnect) {
-        const connector = new window.TonConnect({
-          manifestUrl: this.tonConnectManifestUrl
-        });
-        
-        await connector.restoreConnection();
-        return connector.connected;
-      }
-      
-      return false;
-    } catch (error) {
-      console.error('Ошибка при проверке подключения кошелька:', error);
-      return false;
-    }
+    return this.connector ? this.connector.connected : false;
   }
 
   // Отключает кошелек
@@ -156,22 +111,29 @@ class TelegramWalletConnector {
     }
     
     try {
-      // Удаляем данные о подключении из localStorage
-      localStorage.removeItem("walletConnected");
-      
-      // Если используется TON Connect, отключаем соединение
-      if (window.TonConnect) {
-        const connector = new window.TonConnect({
-          manifestUrl: this.tonConnectManifestUrl
-        });
-        
-        await connector.disconnect();
+      if (this.connector) {
+        await this.connector.disconnect();
       }
       
+      localStorage.removeItem("walletConnected");
       return true;
     } catch (error) {
       console.error('Ошибка при отключении кошелька:', error);
       return false;
+    }
+  }
+  
+  // Получает адрес кошелька
+  getWalletAddress() {
+    if (!this.connector || !this.connector.connected) {
+      return null;
+    }
+    
+    try {
+      return this.connector.wallet?.account?.address || null;
+    } catch (error) {
+      console.error('Ошибка при получении адреса кошелька:', error);
+      return null;
     }
   }
 }
