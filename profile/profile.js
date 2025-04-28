@@ -5,6 +5,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const totalRolls = document.getElementById("total-rolls");
   const bestScore = document.getElementById("best-score");
   const rank = document.getElementById("rank");
+  const connectWalletBtn = document.getElementById("connect-wallet");
+  const walletBadge = document.getElementById("wallet-badge");
   
   // Скрываем loader
   const loader = document.querySelector('.loader');
@@ -13,6 +15,102 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   console.log("Initializing profile page...");
+  
+  // Проверка статуса кошелька
+  let walletConnected = false;
+  
+  // Функция обновления статуса кошелька
+  function updateWalletStatus(isConnected) {
+    walletConnected = isConnected;
+    if (isConnected) {
+      walletBadge.textContent = "Кошелёк подключен";
+      walletBadge.parentElement.style.backgroundColor = "rgba(39, 174, 96, 0.3)";
+      connectWalletBtn.textContent = "Кошелёк подключен";
+      connectWalletBtn.disabled = true;
+      connectWalletBtn.style.opacity = "0.7";
+    } else {
+      walletBadge.textContent = "Кошелёк не подключен";
+      walletBadge.parentElement.style.backgroundColor = "rgba(82, 136, 193, 0.3)";
+      connectWalletBtn.innerHTML = `
+        <svg class="wallet-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M4 4C2.89543 4 2 4.89543 2 6V18C2 19.1046 2.89543 20 4 20H20C21.1046 20 22 19.1046 22 18V10C22 8.89543 21.1046 8 20 8H18V6C18 4.89543 17.1046 4 16 4H4ZM16 10H20V18H4V6H16V10ZM18 12C18.5523 12 19 12.4477 19 13C19 13.5523 18.5523 14 18 14C17.4477 14 17 13.5523 17 13C17 12.4477 17.4477 12 18 12Z"/>
+        </svg>
+        Подключить кошелёк Telegram
+      `;
+      connectWalletBtn.disabled = false;
+    }
+  }
+  
+  // Обработчик нажатия на кнопку подключения кошелька
+  connectWalletBtn.addEventListener("click", async () => {
+    if (walletConnected) return;
+    
+    try {
+      if (window.Telegram && window.Telegram.WebApp) {
+        const tg = window.Telegram.WebApp;
+        
+        // Показываем сообщение о загрузке
+        connectWalletBtn.innerHTML = `
+          <div class="spinner" style="width: 20px; height: 20px; border: 2px solid; border-radius: 50%; border-color: white transparent white transparent; animation: spin 1s linear infinite;"></div>
+          Подключение...
+        `;
+        
+        // Анимация вращения для индикатора загрузки
+        const style = document.createElement('style');
+        style.textContent = `
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `;
+        document.head.appendChild(style);
+        
+        // Ожидаем небольшую задержку для имитации процесса подключения
+        setTimeout(() => {
+          // Вызываем API Telegram для открытия встроенного кошелька (если API недоступно, просто имитируем)
+          if (tg.showPopup) {
+            tg.showPopup({
+              title: "Подключение кошелька",
+              message: "Для подключения кошелька необходимо подтвердить действие",
+              buttons: [{type: "ok", text: "Подключить"}, {type: "cancel", text: "Отмена"}]
+            }, (buttonId) => {
+              if (buttonId === "ok") {
+                updateWalletStatus(true);
+              } else {
+                connectWalletBtn.innerHTML = `
+                  <svg class="wallet-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M4 4C2.89543 4 2 4.89543 2 6V18C2 19.1046 2.89543 20 4 20H20C21.1046 20 22 19.1046 22 18V10C22 8.89543 21.1046 8 20 8H18V6C18 4.89543 17.1046 4 16 4H4ZM16 10H20V18H4V6H16V10ZM18 12C18.5523 12 19 12.4477 19 13C19 13.5523 18.5523 14 18 14C17.4477 14 17 13.5523 17 13C17 12.4477 17.4477 12 18 12Z"/>
+                  </svg>
+                  Подключить кошелёк Telegram
+                `;
+              }
+            });
+          } else {
+            // Имитация успешного подключения, если API недоступно
+            updateWalletStatus(true);
+          }
+        }, 1500);
+      } else {
+        // Имитация подключения в режиме тестирования
+        setTimeout(() => {
+          updateWalletStatus(true);
+        }, 1500);
+      }
+    } catch (error) {
+      console.error("Ошибка при подключении кошелька:", error);
+      connectWalletBtn.innerHTML = `
+        <svg class="wallet-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M4 4C2.89543 4 2 4.89543 2 6V18C2 19.1046 2.89543 20 4 20H20C21.1046 20 22 19.1046 22 18V10C22 8.89543 21.1046 8 20 8H18V6C18 4.89543 17.1046 4 16 4H4ZM16 10H20V18H4V6H16V10ZM18 12C18.5523 12 19 12.4477 19 13C19 13.5523 18.5523 14 18 14C17.4477 14 17 13.5523 17 13C17 12.4477 17.4477 12 18 12Z"/>
+        </svg>
+        Подключить кошелёк Telegram
+      `;
+      
+      // Показываем уведомление об ошибке
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
+        window.Telegram.WebApp.showAlert("Ошибка при подключении кошелька. Пожалуйста, попробуйте позже.");
+      }
+    }
+  });
 
   // Проверяем, доступен ли Telegram API
   if (window.Telegram && window.Telegram.WebApp) {
@@ -124,4 +222,12 @@ document.addEventListener("DOMContentLoaded", () => {
   totalRolls.textContent = "128";
   bestScore.textContent = "12";
   rank.textContent = "42";
+  
+  // Проверка состояния подключения кошелька (например, из localStorage)
+  const savedWalletStatus = localStorage.getItem("walletConnected");
+  if (savedWalletStatus === "true") {
+    updateWalletStatus(true);
+  } else {
+    updateWalletStatus(false);
+  }
 }); 

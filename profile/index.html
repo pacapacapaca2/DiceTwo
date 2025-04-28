@@ -115,6 +115,58 @@
         .bg-opacity-50 {
             background-color: rgba(35, 46, 60, 0.5);
         }
+        /* Новые стили для улучшенного дизайна профиля */
+        .profile-header {
+            background: linear-gradient(to bottom, rgba(82, 136, 193, 0.2), rgba(35, 46, 60, 0.1));
+            border-radius: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .stats-card {
+            background-color: rgba(35, 46, 60, 0.8);
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .wallet-button {
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+        }
+        .wallet-button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        .wallet-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+        .badge {
+            background-color: rgba(82, 136, 193, 0.3);
+            color: var(--tg-theme-text-color);
+            border-radius: 9999px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            display: inline-flex;
+        }
     </style>
 </head>
 <body ontouchstart="" class="okxc-using-mouse tc-using-mouse" style="top: auto;">
@@ -125,25 +177,37 @@
                     <div class="tg-secondary-bg">
                         <div class="min-page-content-height">
                             <div id="profile-container" class="flex flex-col items-center py-8">
-                                <div id="profile-photo" class="w-24 h-24 rounded-full bg-gray-700 mb-4 overflow-hidden">
-                                    <!-- Фото профиля будет загружено через JavaScript -->
+                                <div class="profile-header w-full max-w-md flex flex-col items-center">
+                                    <div id="profile-photo" class="w-24 h-24 rounded-full bg-gray-700 mb-4 overflow-hidden">
+                                        <!-- Фото профиля будет загружено через JavaScript -->
+                                    </div>
+                                    <h2 id="profile-name" class="text-xl font-bold mb-2">Загрузка...</h2>
+                                    <p id="profile-username" class="text-sm text-gray-400 mb-2">@username</p>
+                                    <div id="wallet-status" class="badge">
+                                        <span id="wallet-badge">Кошелёк не подключен</span>
+                                    </div>
                                 </div>
-                                <h2 id="profile-name" class="text-xl font-bold mb-2">Загрузка...</h2>
-                                <p id="profile-username" class="text-sm text-gray-400 mb-6">@username</p>
                                 
                                 <div class="w-full max-w-md p-4 bg-opacity-50 rounded-lg mb-6">
-                                    <div class="flex justify-between items-center mb-4 p-3 bg-[#232e3c] rounded-lg">
+                                    <div class="flex justify-between items-center mb-4 p-3 stats-card">
                                         <span>Общее количество бросков</span>
                                         <span id="total-rolls" class="font-bold">0</span>
                                     </div>
-                                    <div class="flex justify-between items-center mb-4 p-3 bg-[#232e3c] rounded-lg">
+                                    <div class="flex justify-between items-center mb-4 p-3 stats-card">
                                         <span>Лучший результат</span>
                                         <span id="best-score" class="font-bold">0</span>
                                     </div>
-                                    <div class="flex justify-between items-center p-3 bg-[#232e3c] rounded-lg">
+                                    <div class="flex justify-between items-center p-3 stats-card">
                                         <span>Позиция в рейтинге</span>
                                         <span id="rank" class="font-bold">-</span>
                                     </div>
+                                    
+                                    <button id="connect-wallet" class="wallet-button">
+                                        <svg class="wallet-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M4 4C2.89543 4 2 4.89543 2 6V18C2 19.1046 2.89543 20 4 20H20C21.1046 20 22 19.1046 22 18V10C22 8.89543 21.1046 8 20 8H18V6C18 4.89543 17.1046 4 16 4H4ZM16 10H20V18H4V6H16V10ZM18 12C18.5523 12 19 12.4477 19 13C19 13.5523 18.5523 14 18 14C17.4477 14 17 13.5523 17 13C17 12.4477 17.4477 12 18 12Z"/>
+                                        </svg>
+                                        Подключить кошелёк Telegram
+                                    </button>
                                 </div>
                             </div>
                             <style>
