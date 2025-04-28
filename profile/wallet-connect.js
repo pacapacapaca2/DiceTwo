@@ -2,8 +2,8 @@
 class TelegramWalletConnector {
   constructor() {
     this.isInitialized = false;
-    // Используем манифест с GitHub Pages вместо локального файла
-    this.tonConnectManifestUrl = 'https://raw.githubusercontent.com/tonconnect/tonconnect-manifest/main/sample-manifest.json';
+    // Используем локальный манифест вместо примера с GitHub
+    this.tonConnectManifestUrl = './tonconnect-manifest.json';
     this.connector = null;
     this.dAppName = 'DiceTwo';
   }

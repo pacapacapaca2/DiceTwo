@@ -191,15 +191,32 @@ document.addEventListener("DOMContentLoaded", () => {
     if (connected) {
       // Получаем адрес кошелька, если доступен
       const address = telegramWalletConnector.getWalletAddress();
+      console.log("Получен адрес кошелька после подключения:", address);
       // Обновляем статус на "подключен"
       updateWalletStatus(true, address);
       // Показываем уведомление об успешном подключении
       showConnectionNotification(true);
     } else {
       // Обновляем статус на "отключен"
+      console.log("Событие walletStatusChange сообщило об отключении кошелька");
       updateWalletStatus(false);
     }
   });
+
+  // Функция для проверки доступности SDK TON Connect
+  function checkTonConnectAvailability() {
+    if (window.TonConnect) {
+      console.log("TON Connect SDK доступен в глобальном объекте window");
+      console.log("Версия SDK:", window.TonConnect.version || "не указана");
+      return true;
+    } else {
+      console.error("ОШИБКА: TON Connect SDK не доступен в глобальном объекте window");
+      return false;
+    }
+  }
+
+  // Проверяем при загрузке страницы
+  checkTonConnectAvailability();
 
   // Проверяем, доступен ли Telegram API
   if (window.Telegram && window.Telegram.WebApp) {
