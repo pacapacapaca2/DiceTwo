@@ -20,8 +20,24 @@
     <!-- Telegram Web App API -->
     <script src="https://telegram.org/js/telegram-web-app-beta.js"></script>
     <script>window.Telegram.WebApp.expand();</script>
-    <!-- TON Connect SDK -->
+    
+    <!-- TON Connect SDK - загружаем обе версии для совместимости -->
     <script src="https://tonconnect.github.io/sdk/tonconnect-web.js"></script>
+    <script src="https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect-sdk.min.js"></script>
+    <script>
+      // Проверяем что SDK загрузился и делаем его доступным через разные способы
+      window.addEventListener('load', function() {
+        console.log('Checking TON Connect SDK availability...');
+        if (typeof TonConnect !== 'undefined') {
+          console.log('Global TonConnect is available');
+          window.TonConnect_SDK = TonConnect;
+        }
+        if (typeof window.tonconnect !== 'undefined') {
+          console.log('window.tonconnect is available');
+        }
+      });
+    </script>
+    
     <!-- Аналитика Telegram -->
     <script async src="https://tganalytics.xyz/index.js" type="text/javascript"></script>
     

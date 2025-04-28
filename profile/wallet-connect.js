@@ -101,29 +101,38 @@ class TelegramWalletConnector {
     try {
       this.logToScreen('Начинаем инициализацию TON Connect...', 'info');
       
-      // Проверяем, загружен ли скрипт TonConnect через глобальный объект window.TonConnect.SDK
-      if (!window.TonConnect && !window.TonConnect_SDK) {
-        const errorMsg = 'TON Connect SDK не доступен в window.TonConnect';
-        this.logToScreen(errorMsg, 'error');
+      // Проверяем все возможные способы доступа к TON Connect
+      const hasTonConnect = typeof window.TonConnect !== 'undefined';
+      const hasTonConnectSDK = typeof window.TonConnect_SDK !== 'undefined';
+      // window.tonconnect создается когда скрипт загружается с tonconnect-web.js
+      const hasTonconnect = typeof window.tonconnect !== 'undefined';
+      const hasGlobalTonConnect = typeof TonConnect !== 'undefined';
+      
+      this.logToScreen(`Проверка SDK: window.TonConnect=${hasTonConnect}, window.tonconnect=${hasTonconnect}, TonConnect=${hasGlobalTonConnect}`, 'info');
+      
+      if (!hasTonConnect && !hasTonConnectSDK && !hasTonconnect && !hasGlobalTonConnect) {
+        this.logToScreen('TON Connect SDK не доступен ни в одном из объектов', 'error');
         
-        // Пробуем использовать глобальную переменную, созданную из скрипта в index.html
-        if (typeof TonConnect !== 'undefined') {
-          this.logToScreen('Найден глобальный объект TonConnect из скрипта', 'success');
-          window.TonConnect_SDK = TonConnect;
-        } else {
-          // Попробуем загрузить скрипт динамически
-          this.logToScreen('Пробуем загрузить TON Connect SDK динамически...', 'info');
-          try {
-            await this.loadTonConnectScript();
-          } catch (loadError) {
-            this.logToScreen(`Не удалось загрузить скрипт TON Connect: ${loadError.message}`, 'error');
-            return false;
-          }
+        // Попробуем загрузить скрипт динамически
+        this.logToScreen('Пробуем загрузить TON Connect SDK динамически...', 'info');
+        try {
+          await this.loadTonConnectScript();
+          // Даем скрипту время инициализироваться
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        } catch (loadError) {
+          this.logToScreen(`Не удалось загрузить скрипт TON Connect: ${loadError.message}`, 'error');
+          return false;
         }
       }
       
       // Повторно проверяем доступность после попытки загрузки
-      if (!window.TonConnect && !window.TonConnect_SDK && typeof TonConnect === 'undefined') {
+      const isTonConnectAvailable = 
+        typeof window.TonConnect !== 'undefined' || 
+        typeof window.TonConnect_SDK !== 'undefined' || 
+        typeof window.tonconnect !== 'undefined' || 
+        typeof TonConnect !== 'undefined';
+      
+      if (!isTonConnectAvailable) {
         this.logToScreen('TON Connect SDK всё ещё недоступен после попытки загрузки', 'error');
         return false;
       }
@@ -136,15 +145,35 @@ class TelegramWalletConnector {
       
       // Создаем экземпляр коннектора TON Connect
       try {
-        // Определяем, какой конструктор использовать
-        const TonConnectConstructor = window.TonConnect || window.TonConnect_SDK || TonConnect;
+        // Определяем, какой метод использовать для создания коннектора
+        if (window.tonconnect) {
+          this.logToScreen('Используем window.tonconnect.createConnector', 'info');
+          this.connector = window.tonconnect.createConnector({
+            manifestUrl: fullManifestUrl
+          });
+        } else if (window.TonConnect) {
+          this.logToScreen('Используем window.TonConnect конструктор', 'info');
+          this.connector = new window.TonConnect({
+            manifestUrl: fullManifestUrl
+          });
+        } else if (typeof TonConnect !== 'undefined') {
+          this.logToScreen('Используем глобальный TonConnect конструктор', 'info');
+          this.connector = new TonConnect({
+            manifestUrl: fullManifestUrl
+          });
+        } else if (window.TonConnect_SDK) {
+          this.logToScreen('Используем window.TonConnect_SDK конструктор', 'info');
+          this.connector = new window.TonConnect_SDK({
+            manifestUrl: fullManifestUrl
+          });
+        } else {
+          throw new Error('Не найден подходящий метод для создания коннектора');
+        }
         
-        this.connector = new TonConnectConstructor({
-          manifestUrl: fullManifestUrl
-        });
         this.logToScreen('Экземпляр TON Connect создан успешно', 'success');
       } catch (connectorError) {
         this.logToScreen(`Ошибка при создании экземпляра TON Connect: ${connectorError.message}`, 'error');
+        console.error('TON Connect Error:', connectorError);
         return false;
       }
 
@@ -180,6 +209,7 @@ class TelegramWalletConnector {
       return true;
     } catch (error) {
       this.logToScreen(`Общая ошибка при инициализации: ${error.message}`, 'error');
+      console.error('Initialization Error:', error);
       return false;
     }
   }
@@ -196,20 +226,32 @@ class TelegramWalletConnector {
       }
       
       const script = document.createElement('script');
-      script.src = 'https://tonconnect.github.io/sdk/tonconnect-web.js';
+      // Используем CDN для библиотеки TonConnect
+      script.src = 'https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect-sdk.min.js';
       script.async = true;
       
       script.onload = () => {
         this.logToScreen('TON Connect SDK загружен динамически', 'success');
-        // Присваиваем глобальную переменную, если она существует
-        if (typeof TonConnect !== 'undefined') {
-          window.TonConnect_SDK = TonConnect;
-        }
         resolve();
       };
       
       script.onerror = (err) => {
-        reject(new Error('Не удалось загрузить скрипт TON Connect SDK'));
+        this.logToScreen('Ошибка загрузки скрипта, пробуем альтернативный источник', 'warning');
+        // Пробуем альтернативный источник, если первый не сработал
+        const alternativeScript = document.createElement('script');
+        alternativeScript.src = 'https://tonconnect.github.io/sdk/tonconnect-web.js';
+        alternativeScript.async = true;
+        
+        alternativeScript.onload = () => {
+          this.logToScreen('TON Connect SDK загружен из альтернативного источника', 'success');
+          resolve();
+        };
+        
+        alternativeScript.onerror = () => {
+          reject(new Error('Не удалось загрузить скрипт TON Connect SDK из обоих источников'));
+        };
+        
+        document.head.appendChild(alternativeScript);
       };
       
       document.head.appendChild(script);
@@ -351,5 +393,5 @@ const telegramWalletConnector = new TelegramWalletConnector();
 document.addEventListener('DOMContentLoaded', () => {
   telegramWalletConnector.logToScreen('DOMContentLoaded: Начинаем инициализацию коннектора', 'info');
   // Добавляем небольшую задержку перед инициализацией, чтобы скрипты успели загрузиться
-  setTimeout(() => telegramWalletConnector.initialize(), 1000);
+  setTimeout(() => telegramWalletConnector.initialize(), 1500);
 }); 
