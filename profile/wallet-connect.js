@@ -101,23 +101,29 @@ class TelegramWalletConnector {
     try {
       this.logToScreen('Начинаем инициализацию TON Connect...', 'info');
       
-      // Проверяем, загружен ли скрипт TonConnect
-      if (!window.TonConnect) {
+      // Проверяем, загружен ли скрипт TonConnect через глобальный объект window.TonConnect.SDK
+      if (!window.TonConnect && !window.TonConnect_SDK) {
         const errorMsg = 'TON Connect SDK не доступен в window.TonConnect';
         this.logToScreen(errorMsg, 'error');
         
-        // Попробуем загрузить скрипт динамически
-        this.logToScreen('Пробуем загрузить TON Connect SDK динамически...', 'info');
-        try {
-          await this.loadTonConnectScript();
-        } catch (loadError) {
-          this.logToScreen(`Не удалось загрузить скрипт TON Connect: ${loadError.message}`, 'error');
-          return false;
+        // Пробуем использовать глобальную переменную, созданную из скрипта в index.html
+        if (typeof TonConnect !== 'undefined') {
+          this.logToScreen('Найден глобальный объект TonConnect из скрипта', 'success');
+          window.TonConnect_SDK = TonConnect;
+        } else {
+          // Попробуем загрузить скрипт динамически
+          this.logToScreen('Пробуем загрузить TON Connect SDK динамически...', 'info');
+          try {
+            await this.loadTonConnectScript();
+          } catch (loadError) {
+            this.logToScreen(`Не удалось загрузить скрипт TON Connect: ${loadError.message}`, 'error');
+            return false;
+          }
         }
       }
       
       // Повторно проверяем доступность после попытки загрузки
-      if (!window.TonConnect) {
+      if (!window.TonConnect && !window.TonConnect_SDK && typeof TonConnect === 'undefined') {
         this.logToScreen('TON Connect SDK всё ещё недоступен после попытки загрузки', 'error');
         return false;
       }
@@ -130,7 +136,10 @@ class TelegramWalletConnector {
       
       // Создаем экземпляр коннектора TON Connect
       try {
-        this.connector = new window.TonConnect({
+        // Определяем, какой конструктор использовать
+        const TonConnectConstructor = window.TonConnect || window.TonConnect_SDK || TonConnect;
+        
+        this.connector = new TonConnectConstructor({
           manifestUrl: fullManifestUrl
         });
         this.logToScreen('Экземпляр TON Connect создан успешно', 'success');
@@ -178,12 +187,24 @@ class TelegramWalletConnector {
   // Загрузка скрипта TON Connect динамически
   loadTonConnectScript() {
     return new Promise((resolve, reject) => {
+      // Проверяем, существует ли уже скрипт
+      if (document.querySelector('script[src*="tonconnect"]')) {
+        this.logToScreen('Скрипт TON Connect уже присутствует в DOM', 'info');
+        // Даем время на загрузку скрипта
+        setTimeout(resolve, 500);
+        return;
+      }
+      
       const script = document.createElement('script');
-      script.src = 'https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect-sdk.min.js';
+      script.src = 'https://tonconnect.github.io/sdk/tonconnect-web.js';
       script.async = true;
       
       script.onload = () => {
         this.logToScreen('TON Connect SDK загружен динамически', 'success');
+        // Присваиваем глобальную переменную, если она существует
+        if (typeof TonConnect !== 'undefined') {
+          window.TonConnect_SDK = TonConnect;
+        }
         resolve();
       };
       
@@ -329,5 +350,6 @@ const telegramWalletConnector = new TelegramWalletConnector();
 // Инициализируем коннектор при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
   telegramWalletConnector.logToScreen('DOMContentLoaded: Начинаем инициализацию коннектора', 'info');
-  telegramWalletConnector.initialize();
+  // Добавляем небольшую задержку перед инициализацией, чтобы скрипты успели загрузиться
+  setTimeout(() => telegramWalletConnector.initialize(), 1000);
 }); 

@@ -17,10 +17,14 @@
     initial-scale=1, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
 
     <title>DiceTwo</title>
-    <script src="https://telegram.org/js/telegram-web-app-beta.js"> </script>
-    <script async src="https://tganalytics.xyz/index.js" type="text/javascript"> </script>
+    <!-- Telegram Web App API -->
+    <script src="https://telegram.org/js/telegram-web-app-beta.js"></script>
+    <script>window.Telegram.WebApp.expand();</script>
+    <!-- TON Connect SDK -->
     <script src="https://tonconnect.github.io/sdk/tonconnect-web.js"></script>
-    <script> window.Telegram.WebApp.expand(); </script>
+    <!-- Аналитика Telegram -->
+    <script async src="https://tganalytics.xyz/index.js" type="text/javascript"></script>
+    
     <link rel="stylesheet" crossorigin="" href="/DiceTwo/index-BNSohwKF.css">
     <style> ::-webkit-scrollbar { 	border-radius: 5px !important; 	border: 3px solid transparent !important; 	background-color: rgba(255, 255, 255, 0.101961) !important; 	
         background-clip: content-box !important; 	width: 10px !important; } ::-webkit-scrollbar:hover { 	background-color: rgba(255, 255, 255, 0.172549) !important; } 
@@ -374,7 +378,7 @@
    data-cf-beacon="{&quot;rayId&quot;:&quot;8eaa5f4a9bb6eeb6&quot;,&quot;serverTiming&quot;:{&quot;name&quot;:{&quot;cfExtPri&quot;:true,&quot;cfL4&quot;:true,&quot;cfSpeedBrain&quot;:true,&quot;cfCacheStatus&quot;:true}},&quot;version&quot;:&quot;2024.10.5&quot;,&quot;token&quot;:&quot;f69d3ea62cdf4c4bb149e92a5f06dad9&quot;}" 
    crossorigin="anonymous">
    </script>
-   <script src="https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect-sdk.min.js"></script>
+   <!-- Сначала загружаем wallet-connect.js и затем profile.js -->
    <script src="wallet-connect.js"></script>
    <script src="profile.js"></script>
 </body>
