@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const walletNameElement = document.querySelector('.wallet-name');
     const walletBalanceElement = document.querySelector('.wallet-balance');
     const walletImageElement = document.querySelector('.wallet-image');
+    const walletStatusMessage = document.querySelector('.wallet-status-message');
+    const walletInfo = document.querySelector('.wallet-info');
     const gameStatsContainer = document.querySelector('.game-stats');
     
     // Статистические элементы
@@ -196,9 +198,13 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateUIWithWalletInfo(walletInfo) {
         if (!walletInfo) return;
         
-        // Показываем информацию о кошельке
-        if (profileContainer) {
-            profileContainer.classList.add('wallet-connected');
+        // Скрываем сообщение о подключении и показываем информацию о кошельке
+        if (walletStatusMessage) {
+            walletStatusMessage.style.display = 'none';
+        }
+        
+        if (walletInfo) {
+            walletInfo.style.display = 'flex';
         }
         
         // Отображаем адрес кошелька (в сокращенном виде)
@@ -252,8 +258,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Функция для сброса UI при отключении кошелька
     function resetWalletUI() {
-        if (profileContainer) {
-            profileContainer.classList.remove('wallet-connected');
+        // Показываем сообщение о подключении и скрываем информацию о кошельке
+        if (walletStatusMessage) {
+            walletStatusMessage.style.display = 'flex';
+        }
+        
+        if (walletInfo) {
+            walletInfo.style.display = 'none';
         }
         
         // Очищаем информацию о кошельке
@@ -336,6 +347,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 statElement.appendChild(valueElement);
                 gameStatsContainer.appendChild(statElement);
             });
+            
+            // Обновляем элементы статистики на странице, если они есть
+            if (totalGames) totalGames.textContent = stats.gamesPlayed;
+            if (wins) wins.textContent = stats.gamesWon;
+            if (winRate) {
+                const rate = stats.gamesPlayed > 0 
+                    ? Math.round((stats.gamesWon / stats.gamesPlayed) * 100) 
+                    : 0;
+                winRate.textContent = `${rate}%`;
+            }
+            if (tonWon) tonWon.textContent = `${stats.totalWinnings.toFixed(2)} TON`;
             
         } catch (error) {
             console.error('Ошибка при загрузке статистики игры:', error);

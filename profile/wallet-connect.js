@@ -259,23 +259,23 @@ class TelegramWalletConnector {
       // Проверка существования официального SDK 
       if (typeof window.TonConnectSDK !== 'undefined') {
         console.log('Найден глобальный объект TonConnectSDK');
-        
-        // Создание экземпляра коннектора
+
+      // Создание экземпляра коннектора
         this.connector = new window.TonConnectSDK.TonConnect({
-          manifestUrl: this.manifestUrl
-        });
+        manifestUrl: this.manifestUrl
+      });
 
-        if (!this.connector) {
-          throw new Error('Не удалось создать экземпляр TON Connect');
-        }
+      if (!this.connector) {
+        throw new Error('Не удалось создать экземпляр TON Connect');
+      }
       
-        console.log('TON Connect успешно инициализирован');
-        this.isInitialized = true;
+      console.log('TON Connect успешно инициализирован');
+      this.isInitialized = true;
 
-        // После успешной инициализации пробуем восстановить соединение
-        this.tryRestoreConnection();
+      // После успешной инициализации пробуем восстановить соединение
+      this.tryRestoreConnection();
       
-        return true;
+      return true;
       } else {
         console.log('Глобальный объект TonConnectSDK не найден');
         throw new Error('TON Connect SDK не загружен');
@@ -406,7 +406,7 @@ class TelegramWalletConnector {
         // Проверяем, что это сообщение от TON Connect
         if (data && data.type === 'ton-connect-callback') {
           console.log('Получено сообщение от кошелька:', data);
-          
+      
           // Обрабатываем успешное подключение
           if (data.event === 'connect' && data.payload) {
             // Имитируем подключение кошелька
@@ -419,7 +419,7 @@ class TelegramWalletConnector {
               device: {
                 appName: data.walletName || this.preferredWalletName,
                 appVersion: data.version || '1.0'
-              }
+      }
             });
             
             // Отправляем событие о подключении кошелька
@@ -427,14 +427,14 @@ class TelegramWalletConnector {
               detail: { wallet: this.getWalletInfo() }
             });
             document.dispatchEvent(event);
-          }
         }
-      } catch (error) {
-        console.error('Ошибка при обработке сообщения от кошелька:', error);
       }
+    } catch (error) {
+        console.error('Ошибка при обработке сообщения от кошелька:', error);
+    }
     });
   }
-
+  
   // Отправка транзакции через подключенный кошелек
   async sendTransaction(transaction) {
     try {
