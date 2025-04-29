@@ -22,59 +22,346 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // Состояние игры
-  const gameState = {
-    rollCount: 24,
-    bestScore: 12,
-    stars: 32,
-    level: 3,
-    xp: 60, // процент до следующего уровня
+  // Начальное состояние игры
+  const initialGameState = {
+    rollCount: 0,
+    bestScore: 0,
+    stars: 0,
+    level: 1,
+    xp: 0, // процент до следующего уровня
     bonusRolls: 0, // бонусные броски
     todayRolls: 0, // сколько бросков сделано сегодня
     maxDailyRolls: 999, // максимальное количество бросков (убираем ограничение)
     history: [], // история бросков
     
-    // Новые данные для режима истории
+    // Данные для режима истории
     currentLocation: "Туманные равнины",
-    currentNode: 2, // 0-индексированный номер текущего узла на карте
+    currentNode: 0, // 0-индексированный номер текущего узла на карте
     storyProgress: {
       "Туманные равнины": [
-        { completed: true, name: "Деревня", type: "normal" },
-        { completed: true, name: "Лес", type: "normal" },
+        { completed: false, name: "Деревня", type: "normal" },
+        { completed: false, name: "Лес", type: "normal" },
         { completed: false, name: "Пещера", type: "normal" },
         { completed: false, name: "Руины", type: "normal" },
         { completed: false, name: "Древний дракон", type: "boss" }
+      ],
+      "Огненные горы": [
+        { completed: false, name: "Перевал", type: "normal" },
+        { completed: false, name: "Пещеры", type: "normal" },
+        { completed: false, name: "Вулкан", type: "normal" },
+        { completed: false, name: "Кузница", type: "normal" },
+        { completed: false, name: "Огненный элементаль", type: "boss" }
+      ],
+      "Ледяная пустошь": [
+        { completed: false, name: "Аванпост", type: "normal" },
+        { completed: false, name: "Замерзшее озеро", type: "normal" },
+        { completed: false, name: "Ледник", type: "normal" },
+        { completed: false, name: "Снежная крепость", type: "normal" },
+        { completed: false, name: "Ледяной гигант", type: "boss" }
       ]
     },
-    currentMission: {
-      title: "Загадка пещеры",
-      description: "Исследуй темную пещеру и найди древний артефакт. Бросай кубики, чтобы преодолеть препятствия!",
-      difficulty: 2, // от 1 до 3
-      targetRolls: 3, // количество успешных бросков для победы
-      successfulRolls: 0, // текущий прогресс
-      requiredValue: 7, // минимальное требуемое значение для успешного броска
-      rewards: {
-        xp: 25,
-        stars: 15,
-        crystals: 3,
-        artifact: "Амулет силы"
+    
+    // Информация о доступных миссиях
+    missions: {
+      "Деревня": {
+        title: "Спасение деревни",
+        description: "Помоги жителям деревни справиться с нашествием крыс. Брось кубики, чтобы прогнать вредителей!",
+        difficulty: 1,
+        targetRolls: 2,
+        requiredValue: 5,
+        rewards: {
+          xp: 10,
+          stars: 5,
+          crystals: 1,
+          artifact: "Свиток мудрости"
+        }
+      },
+      "Лес": {
+        title: "Тайны леса",
+        description: "Исследуй загадочный лес и найди потерянную тропу. Бросай кубики, чтобы преодолеть препятствия!",
+        difficulty: 1,
+        targetRolls: 3,
+        requiredValue: 6,
+        rewards: {
+          xp: 15,
+          stars: 10,
+          crystals: 2,
+          artifact: "Щит героя"
+        }
+      },
+      "Пещера": {
+        title: "Загадка пещеры",
+        description: "Исследуй темную пещеру и найди древний артефакт. Бросай кубики, чтобы преодолеть препятствия!",
+        difficulty: 2,
+        targetRolls: 3,
+        requiredValue: 7,
+        rewards: {
+          xp: 20,
+          stars: 15,
+          crystals: 3,
+          artifact: "Амулет силы"
+        }
+      },
+      "Руины": {
+        title: "Тайны руин",
+        description: "Исследуй древние руины и разгадай их тайны. Что скрывается в глубине веков?",
+        difficulty: 2,
+        targetRolls: 4,
+        requiredValue: 8,
+        rewards: {
+          xp: 30,
+          stars: 20,
+          crystals: 5,
+          artifact: "Ключ от сокровищницы"
+        }
+      },
+      "Древний дракон": {
+        title: "Древний дракон",
+        description: "Сразись с могущественным драконом, хранителем древних сокровищ!",
+        difficulty: 3,
+        targetRolls: 5,
+        requiredValue: 9,
+        rewards: {
+          xp: 50,
+          stars: 100,
+          crystals: 10,
+          artifact: "Древний меч"
+        }
       }
     },
+    
+    // Текущая активная миссия
+    currentMission: null,
+    
+    // Информация об артефактах
     artifacts: [
-      { id: "sword", name: "Древний меч", icon: "🗡️", collected: true },
-      { id: "shield", name: "Щит героя", icon: "🛡️", collected: true },
-      { id: "scroll", name: "Свиток мудрости", icon: "📜", collected: true },
-      { id: "amulet", name: "Амулет силы", icon: "🔮", collected: false },
-      { id: "potion", name: "Зелье исцеления", icon: "🧪", collected: false },
-      { id: "key", name: "Ключ от сокровищницы", icon: "🔑", collected: false },
-      { id: "crown", name: "Корона власти", icon: "👑", collected: false },
-      { id: "gem", name: "Камень душ", icon: "💎", collected: false },
-      { id: "book", name: "Книга заклинаний", icon: "📕", collected: false },
-      { id: "staff", name: "Посох мага", icon: "🪄", collected: false },
-      { id: "ring", name: "Кольцо невидимости", icon: "💍", collected: false },
-      { id: "orb", name: "Сфера элементов", icon: "🔴", collected: false }
+      { id: "sword", name: "Древний меч", icon: "🗡️", collected: false, description: "Легендарное оружие, выкованное в незапамятные времена" },
+      { id: "shield", name: "Щит героя", icon: "🛡️", collected: false, description: "Надежная защита от вражеских атак" },
+      { id: "scroll", name: "Свиток мудрости", icon: "📜", collected: false, description: "Содержит древние знания и тайны" },
+      { id: "amulet", name: "Амулет силы", icon: "🔮", collected: false, description: "Дарует носителю невероятную магическую мощь" },
+      { id: "potion", name: "Зелье исцеления", icon: "🧪", collected: false, description: "Способно излечить любые раны и болезни" },
+      { id: "key", name: "Ключ от сокровищницы", icon: "🔑", collected: false, description: "Открывает дверь к несметным богатствам" },
+      { id: "crown", name: "Корона власти", icon: "👑", collected: false, description: "Символ могущества и власти над землями" },
+      { id: "gem", name: "Камень душ", icon: "💎", collected: false, description: "Таинственный артефакт с невероятной энергией" },
+      { id: "book", name: "Книга заклинаний", icon: "📕", collected: false, description: "Содержит мощные магические формулы" },
+      { id: "staff", name: "Посох мага", icon: "🪄", collected: false, description: "Усиливает магические способности владельца" },
+      { id: "ring", name: "Кольцо невидимости", icon: "💍", collected: false, description: "Делает носителя невидимым для окружающих" },
+      { id: "orb", name: "Сфера элементов", icon: "🔴", collected: false, description: "Позволяет контролировать стихийные силы" }
     ]
   };
+
+  // Загружаем сохраненное состояние или используем начальное
+  let gameState = loadGameState() || {...initialGameState};
+  
+  // Устанавливаем текущую миссию на основе прогресса
+  initCurrentMission();
+
+  // Функция для сохранения состояния игры в localStorage
+  function saveGameState() {
+    localStorage.setItem('diceAdventure_gameState', JSON.stringify(gameState));
+  }
+  
+  // Функция для загрузки состояния игры из localStorage
+  function loadGameState() {
+    const savedState = localStorage.getItem('diceAdventure_gameState');
+    return savedState ? JSON.parse(savedState) : null;
+  }
+  
+  // Функция для сброса прогресса (полного или частичного)
+  function resetGameState(fullReset = false) {
+    if (fullReset) {
+      gameState = {...initialGameState};
+    } else {
+      // Сброс только игрового прогресса, но сохранение коллекций и статистики
+      const artifacts = [...gameState.artifacts];
+      const stars = gameState.stars;
+      const rollCount = gameState.rollCount;
+      const bestScore = gameState.bestScore;
+      
+      gameState = {...initialGameState};
+      gameState.artifacts = artifacts;
+      gameState.stars = stars;
+      gameState.rollCount = rollCount;
+      gameState.bestScore = bestScore;
+    }
+    
+    saveGameState();
+    initCurrentMission();
+    updateUI();
+    updateMapUI();
+  }
+  
+  // Функция для инициализации текущей миссии на основе прогресса
+  function initCurrentMission() {
+    const location = gameState.currentLocation;
+    const nodeIndex = gameState.currentNode;
+    
+    if (gameState.storyProgress[location] && gameState.storyProgress[location][nodeIndex]) {
+      const nodeName = gameState.storyProgress[location][nodeIndex].name;
+      const missionTemplate = gameState.missions[nodeName];
+      
+      if (missionTemplate) {
+        gameState.currentMission = {
+          ...missionTemplate,
+          successfulRolls: 0
+        };
+      }
+    }
+  }
+  
+  // Функция для обновления визуального отображения карты миссий
+  function updateMapUI() {
+    const mapContainer = document.querySelector('.map-path');
+    if (!mapContainer) return;
+    
+    // Очищаем содержимое
+    mapContainer.innerHTML = '';
+    
+    // Получаем текущую локацию и узлы
+    const location = gameState.currentLocation;
+    const nodeIndex = gameState.currentNode;
+    const nodes = gameState.storyProgress[location];
+    
+    if (!nodes) return;
+    
+    // Создаем узлы
+    nodes.forEach((node, index) => {
+      const nodeElement = document.createElement('div');
+      nodeElement.className = `map-node ${node.completed ? 'completed' : ''} ${index === nodeIndex ? 'current' : ''} ${index > nodeIndex ? 'locked' : ''} ${node.type === 'boss' ? 'boss' : ''}`;
+      
+      const nodeIcon = document.createElement('div');
+      nodeIcon.className = 'node-icon';
+      
+      if (node.completed) {
+        nodeIcon.textContent = '✓';
+      } else if (index === nodeIndex) {
+        nodeIcon.textContent = '!';
+      } else if (node.type === 'boss') {
+        nodeIcon.textContent = '⚔️';
+      } else {
+        nodeIcon.textContent = '?';
+      }
+      
+      const nodeLabel = document.createElement('div');
+      nodeLabel.className = 'node-label';
+      nodeLabel.textContent = node.name;
+      
+      nodeElement.appendChild(nodeIcon);
+      nodeElement.appendChild(nodeLabel);
+      mapContainer.appendChild(nodeElement);
+    });
+    
+    // Обновляем заголовок локации
+    const locationTitle = document.querySelector('.location-title');
+    if (locationTitle) {
+      locationTitle.textContent = location;
+    }
+  }
+  
+  // Функция для обновления информации о миссии
+  function updateMissionUI() {
+    const mission = gameState.currentMission;
+    if (!mission) return;
+    
+    // Обновляем заголовок миссии
+    const missionTitle = document.querySelector('.mission-title');
+    if (missionTitle) {
+      missionTitle.textContent = mission.title;
+    }
+    
+    // Обновляем описание миссии
+    const missionDescription = document.querySelector('.mission-description');
+    if (missionDescription) {
+      missionDescription.textContent = mission.description;
+    }
+    
+    // Обновляем сложность
+    const missionDifficulty = document.querySelector('.mission-difficulty');
+    if (missionDifficulty) {
+      let stars = '';
+      for (let i = 0; i < 3; i++) {
+        stars += i < mission.difficulty ? '★' : '☆';
+      }
+      missionDifficulty.textContent = stars;
+    }
+    
+    // Обновляем награды
+    const rewardItems = document.querySelectorAll('.reward-item');
+    if (rewardItems.length >= 3) {
+      // XP
+      const xpIcon = rewardItems[0].querySelector('.reward-icon');
+      const xpValue = rewardItems[0].querySelector('.reward-value');
+      if (xpIcon && xpValue) {
+        xpIcon.textContent = '🏆';
+        xpValue.textContent = `+${mission.rewards.xp} опыта`;
+      }
+      
+      // Звезды
+      const starsIcon = rewardItems[1].querySelector('.reward-icon');
+      const starsValue = rewardItems[1].querySelector('.reward-value');
+      if (starsIcon && starsValue) {
+        starsIcon.textContent = '💎';
+        starsValue.textContent = `×${mission.rewards.crystals} кристалла`;
+      }
+      
+      // Артефакт
+      const artifactIcon = rewardItems[2].querySelector('.reward-icon');
+      const artifactValue = rewardItems[2].querySelector('.reward-value');
+      if (artifactIcon && artifactValue) {
+        const artifact = gameState.artifacts.find(a => a.name === mission.rewards.artifact);
+        if (artifact) {
+          artifactIcon.textContent = artifact.icon;
+          artifactValue.textContent = artifact.name;
+        }
+      }
+    }
+  }
+  
+  // Функция для обновления отображения коллекции артефактов
+  function updateArtifactsUI() {
+    const collectionContainer = document.querySelector('.artifacts-container');
+    if (!collectionContainer) return;
+    
+    // Очищаем содержимое
+    collectionContainer.innerHTML = '';
+    
+    // Получаем информацию о собранных артефактах
+    const collectedCount = gameState.artifacts.filter(a => a.collected).length;
+    const totalCount = gameState.artifacts.length;
+    
+    // Обновляем счетчик
+    const collectionCount = document.querySelector('.collection-count');
+    if (collectionCount) {
+      collectionCount.textContent = `${collectedCount}/${totalCount}`;
+    }
+    
+    // Добавляем собранные артефакты
+    const collectedArtifacts = gameState.artifacts.filter(a => a.collected);
+    collectedArtifacts.forEach(artifact => {
+      const artifactElement = document.createElement('div');
+      artifactElement.className = 'artifact-item collected';
+      
+      const artifactIcon = document.createElement('div');
+      artifactIcon.className = 'artifact-icon';
+      artifactIcon.textContent = artifact.icon;
+      
+      artifactElement.appendChild(artifactIcon);
+      collectionContainer.appendChild(artifactElement);
+    });
+    
+    // Добавляем несколько заблокированных слотов
+    for (let i = 0; i < 5 && collectedCount + i < totalCount; i++) {
+      const artifactElement = document.createElement('div');
+      artifactElement.className = 'artifact-item locked';
+      
+      const artifactIcon = document.createElement('div');
+      artifactIcon.className = 'artifact-icon';
+      artifactIcon.textContent = '?';
+      
+      artifactElement.appendChild(artifactIcon);
+      collectionContainer.appendChild(artifactElement);
+    }
+  }
 
   // Функция для создания анимации очков
   function createPointsAnimation(points) {
@@ -111,14 +398,26 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     
     // Обновляем текст кнопки броска
-    if (gameState.currentMission.successfulRolls < gameState.currentMission.targetRolls) {
-      const remainingRolls = gameState.currentMission.targetRolls - gameState.currentMission.successfulRolls;
-      rollButton.textContent = `Бросить кубики (${remainingRolls})`;
+    if (gameState.currentMission) {
+      if (gameState.currentMission.successfulRolls < gameState.currentMission.targetRolls) {
+        const remainingRolls = gameState.currentMission.targetRolls - gameState.currentMission.successfulRolls;
+        rollButton.textContent = `Бросить кубики (${remainingRolls})`;
+      } else {
+        rollButton.textContent = "Завершить миссию";
+      }
     } else {
-      rollButton.textContent = "Завершить миссию";
+      rollButton.textContent = "Бросить кубики";
     }
     
     rollButton.disabled = false;
+    
+    // Обновляем другие элементы интерфейса
+    updateMapUI();
+    updateMissionUI();
+    updateArtifactsUI();
+    
+    // Сохраняем состояние
+    saveGameState();
   }
 
   // Функция для проверки броска и начисления очков
@@ -129,11 +428,11 @@ document.addEventListener("DOMContentLoaded", () => {
     let missionSuccess = false;
     
     // Проверяем успех миссии
-    if (total >= gameState.currentMission.requiredValue) {
+    if (gameState.currentMission && total >= gameState.currentMission.requiredValue) {
       missionSuccess = true;
       gameState.currentMission.successfulRolls++;
       message += ` (успех! ✅)`;
-    } else {
+    } else if (gameState.currentMission) {
       message += ` (неудача ❌)`;
     }
     
@@ -186,10 +485,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     
     // Проверяем завершение миссии
-    if (gameState.currentMission.successfulRolls >= gameState.currentMission.targetRolls) {
+    if (gameState.currentMission && gameState.currentMission.successfulRolls >= gameState.currentMission.targetRolls) {
       message += " (миссия выполнена!)";
       rollButton.textContent = "Завершить миссию";
     }
+    
+    // Сохраняем состояние игры
+    saveGameState();
     
     return { points, message, missionSuccess };
   }
@@ -232,50 +534,31 @@ document.addEventListener("DOMContentLoaded", () => {
     // Разблокируем следующий узел
     if (currentNodeIndex < gameState.storyProgress[currentLocation].length - 1) {
       gameState.currentNode++;
-      
-      // Обновляем текущую миссию (Это упрощенно, в реальном приложении нужно загружать из базы)
-      if (gameState.currentNode === gameState.storyProgress[currentLocation].length - 1) {
-        // Босс
-        gameState.currentMission = {
-          title: "Древний дракон",
-          description: "Сразись с могущественным драконом, хранителем древних сокровищ!",
-          difficulty: 3,
-          targetRolls: 5,
-          successfulRolls: 0,
-          requiredValue: 9,
-          rewards: {
-            xp: 50,
-            stars: 100,
-            crystals: 10,
-            artifact: "Корона власти"
-          }
-        };
-      } else {
-        // Следующая обычная миссия
-        gameState.currentMission = {
-          title: "Тайны руин",
-          description: "Исследуй древние руины и разгадай их тайны. Что скрывается в глубине веков?",
-          difficulty: 2,
-          targetRolls: 4,
-          successfulRolls: 0,
-          requiredValue: 8,
-          rewards: {
-            xp: 30,
-            stars: 20,
-            crystals: 5,
-            artifact: "Ключ от сокровищницы"
-          }
-        };
-      }
+      initCurrentMission();
     } else {
       // Если это был последний узел, переходим на новую локацию
-      // (упрощенно для примера)
-      resultDiv.textContent += " Локация 'Туманные равнины' пройдена!";
+      const locations = Object.keys(gameState.storyProgress);
+      const currentLocationIndex = locations.indexOf(currentLocation);
+      
+      if (currentLocationIndex < locations.length - 1) {
+        // Переходим к следующей локации
+        gameState.currentLocation = locations[currentLocationIndex + 1];
+        gameState.currentNode = 0;
+        initCurrentMission();
+        resultDiv.textContent += ` Открыта новая локация: ${gameState.currentLocation}!`;
+      } else {
+        // Все локации пройдены
+        gameState.currentMission = null;
+        resultDiv.textContent += " Поздравляем! Вы прошли все доступные локации!";
+      }
     }
+    
+    // Сохраняем состояние игры
+    saveGameState();
     
     // Обновляем UI
     setTimeout(() => {
-      window.location.reload(); // Временное решение, в реальном приложении нужно обновить UI без перезагрузки
+      updateUI();
     }, 3000);
   }
 
@@ -285,7 +568,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Обработчик нажатия на кнопку броска
   rollButton.addEventListener("click", () => {
     // Проверяем, нужно ли завершить миссию
-    if (gameState.currentMission.successfulRolls >= gameState.currentMission.targetRolls) {
+    if (gameState.currentMission && gameState.currentMission.successfulRolls >= gameState.currentMission.targetRolls) {
       completeMission();
       return;
     }
@@ -343,7 +626,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (missionSuccess) {
           resultDiv.classList.add("success-result");
           resultDiv.classList.remove("failure-result");
-        } else {
+        } else if (gameState.currentMission) { // Только если мы в режиме миссии
           resultDiv.classList.add("failure-result");
           resultDiv.classList.remove("success-result");
         }
@@ -364,6 +647,22 @@ document.addEventListener("DOMContentLoaded", () => {
     animation1.addEventListener("complete", onComplete);
     animation2.addEventListener("complete", onComplete);
   });
+
+  // Добавляем кнопку сброса прогресса (только для демонстрации)
+  const resetButton = document.createElement('button');
+  resetButton.id = 'reset-button';
+  resetButton.className = 'secondary-button';
+  resetButton.textContent = 'Сбросить прогресс';
+  resetButton.onclick = () => {
+    if (confirm('Вы уверены, что хотите сбросить прогресс? Это действие нельзя отменить.')) {
+      resetGameState(false);
+    }
+  };
+  
+  const gameContainer = document.getElementById('game-container');
+  if (gameContainer) {
+    gameContainer.appendChild(resetButton);
+  }
 
   // Инициализация интерфейса при загрузке
   updateUI();

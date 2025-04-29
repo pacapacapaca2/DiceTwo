@@ -500,6 +500,26 @@
             75% { transform: translateX(-5px); }
             100% { transform: translateX(0); }
         }
+        
+        /* Стиль для кнопки сброса прогресса */
+        .secondary-button {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--tg-theme-hint-color);
+            border: 1px solid var(--tg-theme-hint-color);
+            border-radius: 10px;
+            font-size: 14px;
+            padding: 10px 16px;
+            margin: 15px auto 80px;
+            display: block;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .secondary-button:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
     </style>
 </head>
 <body ontouchstart="" class="okxc-using-mouse tc-using-mouse" style="top: auto;">
@@ -530,16 +550,16 @@
                                     <div class="location-title">Туманные равнины</div>
                                     <div class="map-container">
                                         <div class="map-path">
-                                            <div class="map-node completed">
-                                                <div class="node-icon">✓</div>
-                                                <div class="node-label">Деревня</div>
-                                            </div>
-                                            <div class="map-node completed">
-                                                <div class="node-icon">✓</div>
-                                                <div class="node-label">Лес</div>
-                                            </div>
                                             <div class="map-node current">
                                                 <div class="node-icon">!</div>
+                                                <div class="node-label">Деревня</div>
+                                            </div>
+                                            <div class="map-node locked">
+                                                <div class="node-icon">?</div>
+                                                <div class="node-label">Лес</div>
+                                            </div>
+                                            <div class="map-node locked">
+                                                <div class="node-icon">?</div>
                                                 <div class="node-label">Пещера</div>
                                             </div>
                                             <div class="map-node locked">
@@ -556,39 +576,39 @@
                                 
                                 <div class="mission-card">
                                     <div class="mission-header">
-                                        <div class="mission-title">Загадка пещеры</div>
-                                        <div class="mission-difficulty">★★☆</div>
+                                        <div class="mission-title">Спасение деревни</div>
+                                        <div class="mission-difficulty">★☆☆</div>
                                     </div>
                                     <div class="mission-description">
-                                        Исследуй темную пещеру и найди древний артефакт. Бросай кубики, чтобы преодолеть препятствия!
+                                        Помоги жителям деревни справиться с нашествием крыс. Брось кубики, чтобы прогнать вредителей!
                                     </div>
                                     <div class="mission-rewards">
                                         <div class="reward-item">
                                             <div class="reward-icon">🏆</div>
-                                            <div class="reward-value">+25 опыта</div>
+                                            <div class="reward-value">+10 опыта</div>
                                         </div>
                                         <div class="reward-item">
                                             <div class="reward-icon">💎</div>
-                                            <div class="reward-value">×3 кристалла</div>
+                                            <div class="reward-value">×1 кристалл</div>
                                         </div>
                                         <div class="reward-item artifact">
-                                            <div class="reward-icon">🔮</div>
-                                            <div class="reward-value">Амулет силы</div>
+                                            <div class="reward-icon">📜</div>
+                                            <div class="reward-value">Свиток мудрости</div>
                                         </div>
                                     </div>
                                 </div>
                                 
                                 <div class="stats-grid">
                                     <div class="stat-card">
-                                        <div class="stat-value">24</div>
+                                        <div class="stat-value">0</div>
                                         <div class="stat-label">Броски</div>
                                     </div>
                                     <div class="stat-card">
-                                        <div class="stat-value">12</div>
+                                        <div class="stat-value">0</div>
                                         <div class="stat-label">Лучший</div>
                                     </div>
                                     <div class="stat-card">
-                                        <div class="stat-value">★ 32</div>
+                                        <div class="stat-value">★ 0</div>
                                         <div class="stat-label">Звёзды</div>
                                     </div>
                                 </div>
@@ -603,19 +623,19 @@
                                 
                                 <div id="result" style="display: none;">Начни испытание!</div>
                                 
-                                <button id="roll-button">Начать испытание</button>
+                                <button id="roll-button">Бросить кубики (2)</button>
                                 
                                 <div class="collection-preview">
-                                    <div class="collection-title">Артефакты <span class="collection-count">3/12</span></div>
+                                    <div class="collection-title">Артефакты <span class="collection-count">0/12</span></div>
                                     <div class="artifacts-container">
-                                        <div class="artifact-item collected">
-                                            <div class="artifact-icon">🗡️</div>
+                                        <div class="artifact-item locked">
+                                            <div class="artifact-icon">?</div>
                                         </div>
-                                        <div class="artifact-item collected">
-                                            <div class="artifact-icon">🛡️</div>
+                                        <div class="artifact-item locked">
+                                            <div class="artifact-icon">?</div>
                                         </div>
-                                        <div class="artifact-item collected">
-                                            <div class="artifact-icon">📜</div>
+                                        <div class="artifact-item locked">
+                                            <div class="artifact-icon">?</div>
                                         </div>
                                         <div class="artifact-item locked">
                                             <div class="artifact-icon">?</div>
