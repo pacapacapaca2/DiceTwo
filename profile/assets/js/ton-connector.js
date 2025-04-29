@@ -10,6 +10,42 @@ class TonConnector {
     this.connected = false;
     this.isInitialized = false;
     
+    // Списки доступных кошельков
+    this.walletsList = [
+      {
+        name: 'Telegram Wallet',
+        universalLink: 'https://t.me/wallet',
+        bridgeUrl: 'https://bridge.tonapi.io/bridge',
+        aboutUrl: 'https://t.me/wallet',
+        imageUrl: 'https://wallet.tg/images/logo_filled.svg',
+        platforms: ['ios', 'android', 'web']
+      },
+      {
+        name: 'Tonkeeper',
+        universalLink: 'https://app.tonkeeper.com/ton-connect',
+        bridgeUrl: 'https://bridge.tonapi.io/bridge',
+        aboutUrl: 'https://tonkeeper.com',
+        imageUrl: 'https://tonkeeper.com/assets/tonconnect-icon.png',
+        platforms: ['ios', 'android', 'web']
+      },
+      {
+        name: 'Tonhub',
+        universalLink: 'https://tonhub.com/ton-connect',
+        bridgeUrl: 'https://connect.tonhubapi.com/bridge',
+        aboutUrl: 'https://tonhub.com',
+        imageUrl: 'https://tonhub.com/tonconnect_logo.png',
+        platforms: ['ios', 'android']
+      },
+      {
+        name: 'OpenMask',
+        universalLink: 'https://www.openmask.app/ton-connect',
+        bridgeUrl: 'https://bridge.tonapi.io/bridge',
+        aboutUrl: 'https://www.openmask.app/',
+        imageUrl: 'https://openmask.app/logo_om.png',
+        platforms: ['chrome', 'firefox']
+      }
+    ];
+    
     // Инициализация при создании
     this.init();
   }
@@ -21,6 +57,14 @@ class TonConnector {
     this.isInitialized = true;
     console.log('TonConnector инициализирован');
     return true;
+  }
+  
+  /**
+   * Получение списка доступных кошельков
+   * @returns {Promise<Array>} - Список доступных кошельков
+   */
+  getWallets() {
+    return Promise.resolve(this.walletsList);
   }
   
   /**
@@ -57,14 +101,35 @@ class TonConnector {
           return;
         }
         
-        // Генерируем ссылку для Tonkeeper
-        const universal = 'https://app.tonkeeper.com/ton-connect';
+        // Определяем кошелек для подключения
+        let walletConfig;
         
-        if (universal) {
-          resolve({ universal });
-        } else {
-          reject(new Error('Не удалось сгенерировать ссылку для подключения'));
+        // Если указан universalLink - используем его для поиска кошелька
+        if (options.universalLink) {
+          // Ищем кошелек по universalLink
+          walletConfig = this.walletsList.find(wallet => 
+            wallet.universalLink === options.universalLink ||
+            wallet.universalLink.includes(options.universalLink) ||
+            options.universalLink.includes(wallet.name.toLowerCase())
+          );
         }
+        
+        // Если не найден - ищем Telegram Wallet
+        if (!walletConfig) {
+          walletConfig = this.walletsList.find(wallet => 
+            wallet.name === 'Telegram Wallet'
+          );
+        }
+        
+        // Если всё еще не найден - используем первый доступный
+        if (!walletConfig) {
+          walletConfig = this.walletsList[0];
+        }
+        
+        console.log(`Выбран кошелек для подключения: ${walletConfig.name}`);
+        
+        // Возвращаем универсальную ссылку выбранного кошелька
+        resolve({ universal: walletConfig.universalLink });
       } catch (error) {
         reject(error);
       }
@@ -76,6 +141,22 @@ class TonConnector {
    * @returns {Promise<boolean>} - Результат восстановления соединения
    */
   restoreConnection() {
+    // Проверяем, есть ли сохраненные данные о подключении в localStorage
+    const savedWalletData = localStorage.getItem('tonconnect-wallet');
+    
+    if (savedWalletData) {
+      try {
+        const walletData = JSON.parse(savedWalletData);
+        if (walletData && walletData.account) {
+          // Эмулируем подключение с сохраненными данными
+          const emulated = this.emulateConnection(walletData);
+          return Promise.resolve(emulated);
+        }
+      } catch (e) {
+        console.error('Ошибка при восстановлении подключения:', e);
+      }
+    }
+    
     return Promise.resolve(false);
   }
   
@@ -87,6 +168,9 @@ class TonConnector {
     if (this.connected) {
       this.wallet = null;
       this.connected = false;
+      
+      // Удаляем сохраненные данные о подключении
+      localStorage.removeItem('tonconnect-wallet');
       
       // Уведомляем подписчиков
       this.connectCallbacks.forEach(callback => {
@@ -116,6 +200,13 @@ class TonConnector {
     this.wallet = walletInfo;
     this.connected = true;
     
+    // Сохраняем данные о подключении
+    try {
+      localStorage.setItem('tonconnect-wallet', JSON.stringify(walletInfo));
+    } catch (e) {
+      console.error('Ошибка при сохранении данных о кошельке:', e);
+    }
+    
     // Уведомляем подписчиков
     this.connectCallbacks.forEach(callback => {
       try {
@@ -126,6 +217,30 @@ class TonConnector {
     });
     
     return true;
+  }
+  
+  /**
+   * Создает кошелек с тестовыми данными
+   * @param {string} walletName - Название кошелька
+   * @returns {Object} - Объект с данными кошелька
+   */
+  createTestWallet(walletName = 'Telegram Wallet') {
+    const walletConfig = this.walletsList.find(w => w.name === walletName) || this.walletsList[0];
+    
+    return {
+      account: {
+        address: 'EQDrjaLahLkMB-hMCmkzOyBuHJ139ZUYmPHu6RRBKnbdLIYI',
+        chain: 'MAINNET',
+        walletType: 'ton_connect'
+      },
+      device: {
+        platform: 'web',
+        appName: walletConfig.name,
+        appVersion: '1.0.0',
+        deviceModel: 'web'
+      },
+      provider: walletConfig
+    };
   }
 }
 
@@ -140,4 +255,4 @@ window.tonconnect = {
   }
 };
 
-console.log('TON Connect SDK загружен (упрощенная версия)'); 
+console.log('TON Connect SDK загружен (упрощенная версия с поддержкой нескольких кошельков)'); 

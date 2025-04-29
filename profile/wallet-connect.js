@@ -8,6 +8,9 @@ class TelegramWalletConnector {
     this.initRetryCount = 0;
     this.maxRetries = 3;
     this.retryDelay = 800;
+    
+    // Предпочитаемый кошелек (по умолчанию - Telegram Wallet)
+    this.preferredWalletName = 'Telegram Wallet';
 
     // Инициализация при создании экземпляра
     this.initConnector();
@@ -87,9 +90,65 @@ class TelegramWalletConnector {
       }
     }
   }
+  
+  // Получение списка доступных кошельков
+  async getWallets() {
+    try {
+      if (!this.isInitialized) {
+        const initialized = await this.initConnector();
+        if (!initialized) {
+          throw new Error('TON_CONNECT_NOT_INITIALIZED');
+        }
+      }
+      
+      // Проверяем, есть ли метод getWallets в коннекторе
+      if (typeof this.connector.getWallets === 'function') {
+        return await this.connector.getWallets();
+      }
+      
+      // Если нет, используем метод нашей упрощенной версии
+      if (typeof this.connector.walletsList !== 'undefined') {
+        return this.connector.walletsList;
+      }
+      
+      // Если нет ни того, ни другого, возвращаем список по умолчанию
+      return [
+        {
+          name: 'Telegram Wallet',
+          universalLink: 'https://t.me/wallet',
+          bridgeUrl: 'https://bridge.tonapi.io/bridge'
+        },
+        {
+          name: 'Tonkeeper',
+          universalLink: 'https://app.tonkeeper.com/ton-connect',
+          bridgeUrl: 'https://bridge.tonapi.io/bridge'
+        }
+      ];
+    } catch (error) {
+      console.error('Ошибка при получении списка кошельков:', error);
+      // Возвращаем дефолтный список при ошибке
+      return [
+        {
+          name: 'Telegram Wallet',
+          universalLink: 'https://t.me/wallet',
+          bridgeUrl: 'https://bridge.tonapi.io/bridge'
+        },
+        {
+          name: 'Tonkeeper',
+          universalLink: 'https://app.tonkeeper.com/ton-connect',
+          bridgeUrl: 'https://bridge.tonapi.io/bridge'
+        }
+      ];
+    }
+  }
+  
+  // Установка предпочитаемого кошелька
+  setPreferredWallet(walletName) {
+    this.preferredWalletName = walletName;
+  }
 
   // Подключение кошелька
-  async connectWallet() {
+  async connectWallet(walletName = null) {
     try {
       // Проверяем инициализацию
       if (!this.isInitialized) {
@@ -100,51 +159,58 @@ class TelegramWalletConnector {
       }
 
       console.log('Генерация ссылки для подключения...');
+      
+      // Получаем список доступных кошельков
+      const wallets = await this.getWallets();
+      console.log('Доступные кошельки:', wallets);
+      
+      // Определяем, какой кошелек подключать
+      let selectedWallet = null;
+      
+      if (walletName) {
+        // Если имя кошелька указано явно
+        selectedWallet = wallets.find(w => w.name === walletName || w.name.toLowerCase().includes(walletName.toLowerCase()));
+      } else if (this.preferredWalletName) {
+        // Используем предпочитаемый кошелек
+        selectedWallet = wallets.find(w => w.name === this.preferredWalletName || w.name.toLowerCase().includes(this.preferredWalletName.toLowerCase()));
+      }
+      
+      // Если не нашли - ищем Telegram Wallet
+      if (!selectedWallet) {
+        selectedWallet = wallets.find(w => w.name === 'Telegram Wallet' || w.name.includes('Telegram'));
+      }
+      
+      // Если всё еще не нашли - берем первый из списка
+      if (!selectedWallet) {
+        selectedWallet = wallets[0];
+      }
+      
+      console.log(`Выбран кошелек для подключения: ${selectedWallet.name}`);
 
       // Проверяем, есть ли метод getWallets, который есть только в официальном SDK
       if (typeof this.connector.getWallets === 'function') {
-        // Полная версия SDK - получаем список кошельков
         try {
-          console.log("Запрашиваем список доступных кошельков");
-          const wallets = await this.connector.getWallets();
-          console.log("Доступные кошельки:", wallets);
-          
-          // Находим кошелек Telegram (TonKeeper) для подключения
-          let tonkeeperWallet = wallets.find(wallet => 
-            wallet.name === 'Tonkeeper' || 
-            wallet.name.toLowerCase().includes('ton') ||
-            wallet.name.toLowerCase().includes('keeper')
-          );
-          
-          if (!tonkeeperWallet) {
-            // Используем первый доступный кошелек
-            console.log("Кошелек Tonkeeper не найден, используем первый доступный кошелек");
-            tonkeeperWallet = wallets[0];
-          }
-          
           // Формируем ссылку для подключения
           const universalLink = await this.connector.connect({
-            universalLink: tonkeeperWallet.universalLink,
-            bridgeUrl: tonkeeperWallet.bridgeUrl
+            universalLink: selectedWallet.universalLink,
+            bridgeUrl: selectedWallet.bridgeUrl
           });
           
           if (universalLink && universalLink.universal) {
             return universalLink.universal;
-          } else {
-            throw new Error('TON_CONNECT_EMPTY_LINK');
           }
         } catch (error) {
-          console.error('Ошибка при получении списка кошельков:', error);
-          // Переключаемся на прямой метод подключения, если что-то пошло не так
+          console.error('Ошибка при подключении с использованием официального SDK:', error);
+          // Переключаемся на следующий метод
         }
       }
       
-      // Упрощенная версия SDK - прямое подключение к Tonkeeper
+      // Упрощенная версия SDK - прямое подключение
       try {
-        console.log("Используем прямое подключение к Tonkeeper");
+        console.log(`Используем прямое подключение к ${selectedWallet.name}`);
         const connectionResult = await this.connector.connect({
-          universalLink: 'https://app.tonkeeper.com/ton-connect',
-          bridgeUrl: 'https://bridge.tonapi.io/bridge'
+          universalLink: selectedWallet.universalLink,
+          bridgeUrl: selectedWallet.bridgeUrl
         });
         
         if (connectionResult && connectionResult.universal) {
@@ -157,34 +223,42 @@ class TelegramWalletConnector {
         // Если возникла ошибка и мы используем упрощенную версию SDK,
         // пробуем использовать метод emulateConnection если он существует
         if (typeof this.connector.emulateConnection === 'function') {
-          // Создаем тестовый объект кошелька для эмуляции
-          const testWallet = {
-            account: {
-              address: 'EQDrjaLahLkMB-hMCmkzOyBuHJ139ZUYmPHu6RRBKnbdLIYI',
-              chain: 'MAINNET'
-            },
-            device: {
-              platform: 'ios',
-              appName: 'Tonkeeper',
-              appVersion: '2.4.0',
-              deviceModel: 'iPhone'
-            }
-          };
+          let testWallet;
+          
+          // Пробуем использовать метод createTestWallet
+          if (typeof this.connector.createTestWallet === 'function') {
+            testWallet = this.connector.createTestWallet(selectedWallet.name);
+          } else {
+            // Создаем тестовый объект кошелька для эмуляции
+            testWallet = {
+              account: {
+                address: 'EQDrjaLahLkMB-hMCmkzOyBuHJ139ZUYmPHu6RRBKnbdLIYI',
+                chain: 'MAINNET'
+              },
+              device: {
+                platform: 'web',
+                appName: selectedWallet.name,
+                appVersion: '1.0.0',
+                deviceModel: 'web'
+              },
+              provider: selectedWallet
+            };
+          }
           
           const emulated = this.connector.emulateConnection(testWallet);
           if (emulated) {
-            console.log('Успешно эмулировано подключение кошелька');
-            return 'https://app.tonkeeper.com/ton-connect';
+            console.log(`Успешно эмулировано подключение кошелька ${selectedWallet.name}`);
+            return selectedWallet.universalLink;
           }
         }
         
         // Если все методы не сработали, возвращаем стандартную ссылку
-        console.log('Возвращаем стандартную ссылку для Tonkeeper без проверок');
-        return 'https://app.tonkeeper.com/ton-connect';
+        console.log(`Возвращаем стандартную ссылку для ${selectedWallet.name}`);
+        return selectedWallet.universalLink;
       }
       
-      // Если дошли сюда, ничего не сработало - генерируем стандартную ссылку
-      return 'https://app.tonkeeper.com/ton-connect';
+      // Если дошли сюда, ничего не сработало - генерируем ссылку выбранного кошелька
+      return selectedWallet.universalLink;
       
     } catch (error) {
       console.error('Ошибка при подключении кошелька:', error.message);
@@ -237,6 +311,20 @@ class TelegramWalletConnector {
       return null;
     } catch (error) {
       console.error('Ошибка при получении адреса кошелька:', error);
+      return null;
+    }
+  }
+  
+  // Получение информации о подключенном кошельке
+  getWalletInfo() {
+    try {
+      if (!this.connector || !this.connector.wallet) {
+        return null;
+      }
+      
+      return this.connector.wallet;
+    } catch (error) {
+      console.error('Ошибка при получении информации о кошельке:', error);
       return null;
     }
   }

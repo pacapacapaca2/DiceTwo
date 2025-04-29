@@ -19,6 +19,213 @@ document.addEventListener("DOMContentLoaded", () => {
 
   console.log("Initializing profile page...");
   
+  // Функция для создания модального окна выбора кошелька
+  async function showWalletSelectorModal() {
+    // Создаем элементы модального окна
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'wallet-selector-overlay';
+    modalOverlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.2s ease-out;
+    `;
+    
+    const modalContent = document.createElement('div');
+    modalContent.className = 'wallet-selector-content';
+    modalContent.style.cssText = `
+      background-color: var(--tg-theme-secondary-bg-color);
+      border-radius: 12px;
+      padding: 20px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      animation: scaleIn 0.2s ease-out;
+    `;
+    
+    // Добавляем заголовок
+    const modalHeader = document.createElement('div');
+    modalHeader.style.cssText = `
+      margin-bottom: 16px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--tg-theme-section-separator-color);
+    `;
+    modalHeader.textContent = 'Выберите кошелек';
+    
+    // Добавляем анимацию
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @keyframes scaleIn {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+      }
+      @keyframes walletItemHover {
+        from { transform: translateY(0); }
+        to { transform: translateY(-2px); }
+      }
+      .wallet-option {
+        padding: 12px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        background-color: rgba(255, 255, 255, 0.05);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .wallet-option:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+      }
+      .wallet-option img {
+        width: 32px;
+        height: 32px;
+        margin-right: 12px;
+        border-radius: 6px;
+      }
+      .wallet-option-info {
+        flex: 1;
+      }
+      .wallet-name {
+        font-weight: 500;
+        margin-bottom: 2px;
+      }
+      .wallet-description {
+        font-size: 12px;
+        color: var(--tg-theme-hint-color);
+      }
+    `;
+    
+    document.head.appendChild(style);
+    
+    // Получаем список кошельков
+    const wallets = await telegramWalletConnector.getWallets();
+    
+    // Создаем список кошельков
+    const walletsList = document.createElement('div');
+    walletsList.className = 'wallets-list';
+    
+    // Добавляем элементы для каждого кошелька
+    wallets.forEach(wallet => {
+      const walletOption = document.createElement('div');
+      walletOption.className = 'wallet-option';
+      
+      // Определяем изображение кошелька
+      const walletImage = wallet.imageUrl || 
+        (wallet.name.includes('Telegram') ? 
+          'https://wallet.tg/images/logo_filled.svg' : 
+          (wallet.name.includes('Keeper') ? 
+            'https://tonkeeper.com/assets/tonconnect-icon.png' : 
+            'https://ton.org/download/ton_symbol.png'));
+      
+      walletOption.innerHTML = `
+        <img src="${walletImage}" alt="${wallet.name}" onerror="this.src='https://ton.org/download/ton_symbol.png'">
+        <div class="wallet-option-info">
+          <div class="wallet-name">${wallet.name}</div>
+          <div class="wallet-description">${getWalletDescription(wallet)}</div>
+        </div>
+      `;
+      
+      // Добавляем обработчик клика для выбора кошелька
+      walletOption.addEventListener('click', async () => {
+        // Закрываем модальное окно
+        document.body.removeChild(modalOverlay);
+        
+        // Устанавливаем выбранный кошелек как предпочитаемый
+        telegramWalletConnector.setPreferredWallet(wallet.name);
+        
+        // Запускаем процесс подключения
+        connectWalletBtn.disabled = true;
+        connectWalletBtn.textContent = `Подключение ${wallet.name}...`;
+        
+        try {
+          const result = await telegramWalletConnector.connectWallet(wallet.name);
+          if (result && typeof result === 'string' && result.startsWith('http')) {
+            window.location.href = result;
+          }
+        } catch (error) {
+          console.error('Ошибка при подключении кошелька:', error);
+          connectWalletBtn.disabled = false;
+          connectWalletBtn.textContent = "Подключить кошелёк";
+        }
+      });
+      
+      walletsList.appendChild(walletOption);
+    });
+    
+    // Добавляем кнопку закрытия
+    const closeButton = document.createElement('button');
+    closeButton.textContent = 'Отмена';
+    closeButton.style.cssText = `
+      width: 100%;
+      padding: 12px;
+      margin-top: 16px;
+      background-color: transparent;
+      border: 1px solid var(--tg-theme-hint-color);
+      color: var(--tg-theme-text-color);
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    `;
+    
+    closeButton.addEventListener('mouseover', () => {
+      closeButton.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+    });
+    
+    closeButton.addEventListener('mouseout', () => {
+      closeButton.style.backgroundColor = 'transparent';
+    });
+    
+    closeButton.addEventListener('click', () => {
+      document.body.removeChild(modalOverlay);
+    });
+    
+    // Собираем модальное окно
+    modalContent.appendChild(modalHeader);
+    modalContent.appendChild(walletsList);
+    modalContent.appendChild(closeButton);
+    modalOverlay.appendChild(modalContent);
+    
+    // Добавляем на страницу
+    document.body.appendChild(modalOverlay);
+    
+    // Закрытие по клику на оверлей
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) {
+        document.body.removeChild(modalOverlay);
+      }
+    });
+    
+    // Вспомогательная функция для получения описания кошелька
+    function getWalletDescription(wallet) {
+      if (wallet.name.includes('Telegram')) {
+        return 'Встроенный кошелек Telegram';
+      } else if (wallet.name.includes('Keeper')) {
+        return 'Популярный мобильный кошелек';
+      } else if (wallet.name.includes('Tonhub')) {
+        return 'Мобильный кошелек для TON';
+      } else if (wallet.name.includes('OpenMask')) {
+        return 'Расширение для браузера';
+      }
+      return 'TON кошелек';
+    }
+  }
+
   // Функция обновления статуса кошелька
   function updateWalletStatus(isConnected, address = null) {
     if (isConnected) {
@@ -131,80 +338,15 @@ document.addEventListener("DOMContentLoaded", () => {
   // Функция для подключения кошелька
   async function connectWallet() {
     try {
-      // Блокируем кнопку на время попытки подключения
-      connectWalletBtn.disabled = true;
-      connectWalletBtn.textContent = "Подключение...";
-      
-      console.log("Начинаем процесс подключения кошелька");
-      
-      // Проверяем, доступен ли SDK TON Connect
-      if (!window.TonConnect && !window.tonconnect) {
-        console.log("TON Connect SDK не найден, попытка переинициализации...");
-        
-        // Проверяем еще раз после попытки загрузки
-        if (!window.TonConnect && !window.tonconnect) {
-          console.error("TON Connect SDK не доступен после попыток загрузки");
-          throw new Error("TON Connect SDK недоступен");
-        }
-      }
-      
-      // Проверяем, не подключен ли уже кошелек
-      const isConnected = await telegramWalletConnector.isWalletConnected();
-      console.log("Текущий статус подключения кошелька:", isConnected);
-      
-      if (isConnected) {
-        console.log("Кошелек уже подключен");
-        const address = telegramWalletConnector.getWalletAddress();
-        console.log("Адрес кошелька:", address);
-        updateWalletStatus(true, address);
-        return;
-      }
-      
-      // Подключаем кошелек через TON Connect
-      console.log("Вызываем метод connectWallet у telegramWalletConnector");
-      const result = await telegramWalletConnector.connectWallet();
-      console.log("Результат вызова connectWallet:", result);
-      
-      if (result) {
-        console.log("Соединение инициировано успешно, ожидаем ответа от TON Connect");
-        
-        // Если result - строка URL, открываем ее
-        if (typeof result === 'string' && result.startsWith('http')) {
-          window.location.href = result;
-        }
-        
-        // Устанавливаем таймаут для проверки статуса подключения
-        setTimeout(async () => {
-          const isConnectedAfterAttempt = await telegramWalletConnector.isWalletConnected();
-          
-          // Если по каким-то причинам не получили событие walletStatusChange
-          if (!isConnectedAfterAttempt) {
-            console.warn("Не получено подтверждение подключения от кошелька");
-            updateWalletStatus(false);
-            showConnectionNotification(false);
-            connectWalletBtn.disabled = false; // Разблокируем кнопку
-            connectWalletBtn.textContent = "Подключить кошелёк Telegram";
-          }
-        }, 30000); // 30 секунд таймаут
-      } else {
-        console.error("Не удалось инициировать подключение кошелька");
-        // Возвращаем кнопку в исходное состояние в случае ошибки
-        updateWalletStatus(false);
-        showConnectionNotification(false);
-        connectWalletBtn.disabled = false; // Разблокируем кнопку
-        connectWalletBtn.textContent = "Подключить кошелёк Telegram";
-      }
+      // Вместо прямого подключения показываем модальное окно выбора кошелька
+      await showWalletSelectorModal();
+      return;
     } catch (error) {
-      console.error("Ошибка при подключении кошелька:", error);
+      console.error("Ошибка при выборе кошелька:", error);
       updateWalletStatus(false);
       showConnectionNotification(false);
       connectWalletBtn.disabled = false; // Разблокируем кнопку
       connectWalletBtn.textContent = "Подключить кошелёк Telegram";
-      
-      // Показываем пользователю подробное сообщение об ошибке
-      if (error.message && error.message.includes("TON Connect SDK недоступен")) {
-        alert("TON Connect SDK недоступен. Пожалуйста, перезагрузите страницу и попробуйте снова.");
-      }
     }
   }
 
