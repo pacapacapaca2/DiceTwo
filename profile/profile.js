@@ -125,37 +125,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 3000);
   }
 
-  // Функция подключения кошелька
+  // Функция для подключения кошелька
   async function connectWallet() {
     try {
+      // Блокируем кнопку на время попытки подключения
+      connectWalletBtn.disabled = true;
+      connectWalletBtn.textContent = "Подключение...";
+      
       console.log("Начинаем процесс подключения кошелька");
       
-      // Устанавливаем состояние загрузки кнопки
-      connectWalletBtn.disabled = true;
-      connectWalletBtn.innerHTML = `
-        <div class="spinner" style="width: 20px; height: 20px; border: 2px solid; border-radius: 50%; border-color: white transparent white transparent; animation: spin 1s linear infinite;"></div>
-        Подключение...
-      `;
-      
-      // Анимация вращения для индикатора загрузки
-      if (!document.getElementById('spin-animation')) {
-        const style = document.createElement('style');
-        style.id = 'spin-animation';
-        style.textContent = `
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `;
-        document.head.appendChild(style);
-      }
-      
-      // Проверяем доступность TON Connect SDK
+      // Проверяем, доступен ли SDK TON Connect
       if (!window.TonConnect && !window.tonconnect) {
         console.log("TON Connect SDK не найден, попытка переинициализации...");
-        
-        // Принудительно попытаться загрузить SDK
-        await telegramWalletConnector.loadTonConnectScript();
         
         // Проверяем еще раз после попытки загрузки
         if (!window.TonConnect && !window.tonconnect) {
@@ -176,19 +157,18 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       
-      // Инициализируем коннектор перед подключением
-      const initialized = await telegramWalletConnector.initialize();
-      if (!initialized) {
-        throw new Error("Не удалось инициализировать TON Connect");
-      }
-      
       // Подключаем кошелек через TON Connect
       console.log("Вызываем метод connectWallet у telegramWalletConnector");
-      const connected = await telegramWalletConnector.connectWallet();
-      console.log("Результат вызова connectWallet:", connected);
+      const result = await telegramWalletConnector.connectWallet();
+      console.log("Результат вызова connectWallet:", result);
       
-      if (connected) {
+      if (result) {
         console.log("Соединение инициировано успешно, ожидаем ответа от TON Connect");
+        
+        // Если result - строка URL, открываем ее
+        if (typeof result === 'string' && result.startsWith('http')) {
+          window.location.href = result;
+        }
         
         // Устанавливаем таймаут для проверки статуса подключения
         setTimeout(async () => {
@@ -200,6 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
             updateWalletStatus(false);
             showConnectionNotification(false);
             connectWalletBtn.disabled = false; // Разблокируем кнопку
+            connectWalletBtn.textContent = "Подключить кошелёк Telegram";
           }
         }, 30000); // 30 секунд таймаут
       } else {
@@ -208,19 +189,18 @@ document.addEventListener("DOMContentLoaded", () => {
         updateWalletStatus(false);
         showConnectionNotification(false);
         connectWalletBtn.disabled = false; // Разблокируем кнопку
+        connectWalletBtn.textContent = "Подключить кошелёк Telegram";
       }
     } catch (error) {
       console.error("Ошибка при подключении кошелька:", error);
       updateWalletStatus(false);
       showConnectionNotification(false);
       connectWalletBtn.disabled = false; // Разблокируем кнопку
+      connectWalletBtn.textContent = "Подключить кошелёк Telegram";
       
       // Показываем пользователю подробное сообщение об ошибке
       if (error.message && error.message.includes("TON Connect SDK недоступен")) {
         alert("TON Connect SDK недоступен. Пожалуйста, перезагрузите страницу и попробуйте снова.");
-      } else {
-        // Другие ошибки
-        alert("Произошла ошибка при подключении кошелька. Попробуйте еще раз позже.");
       }
     }
   }
