@@ -1,24 +1,49 @@
-// TelegramWalletConnector - класс для взаимодействия с TON Connect
+// TelegramWalletConnector - класс для взаимодействия с TON Connect с использованием официального SDK
 class TelegramWalletConnector {
   constructor() {
     this.connector = null;
     this.isInitialized = false;
     this.retryCount = 0;
-    this.manifestUrl = 'https://example.com/tonconnect-manifest.json';
+    this.manifestUrl = 'https://dicetwo.com/tonconnect-manifest.json';
     this.preferredWalletName = 'Telegram Wallet';
     this.storageKey = 'ton-connect-wallet-data';
     this.purchaseHistoryKey = 'ton-connect-purchase-history';
+    
+    // Пробуем инициализировать при создании экземпляра
     this.initConnector();
   }
 
   // Метод инициализации коннектора с повторными попытками
   async initConnector() {
     try {
-      console.log('Инициализация Telegram Wallet Connector...');
+      console.log('Инициализация TON Connect...');
       
-      // Проверка существования SDK
-      if (typeof window.tonconnect === 'undefined') {
-        throw new Error('TON Connect SDK не загружен');
+      // Проверка существования официального SDK 
+      if (typeof window.TonConnectSDK === 'undefined') {
+        console.log('Проверка наличия глобального объекта TonConnectSDK: не найден');
+        console.log('Проверка альтернативного объекта...');
+        
+        // Проверяем возможные пути импорта SDK
+        if (typeof window.tonconnect === 'undefined') {
+          console.log('Глобальный объект tonconnect не найден');
+          
+          if (typeof TonConnect === 'undefined') {
+            console.error('TON Connect SDK не обнаружен в глобальном пространстве имен');
+            throw new Error('TON Connect SDK не загружен');
+          } else {
+            console.log('Найден глобальный объект TonConnect');
+            // Используем найденный глобальный объект
+            window.tonconnect = {
+              createConnector: (options) => new TonConnect(options)
+            };
+          }
+        } else {
+          console.log('Найден глобальный объект tonconnect');
+        }
+      } else {
+        console.log('Найден глобальный объект TonConnectSDK');
+        // Если SDK доступен через TonConnectSDK, адаптируем его
+        window.tonconnect = window.TonConnectSDK;
       }
 
       // Создание экземпляра коннектора
@@ -26,18 +51,17 @@ class TelegramWalletConnector {
         manifestUrl: this.manifestUrl
       });
 
-      if (this.connector) {
-        console.log('TON Connect SDK успешно инициализирован');
-        this.isInitialized = true;
-
-        // Попытка восстановить предыдущее подключение
-        this.tryRestoreConnection();
-        this.restorePreferredWallet();
-        
-        return true;
-      } else {
-        throw new Error('Не удалось создать экземпляр коннектора');
+      if (!this.connector) {
+        throw new Error('Не удалось создать экземпляр TON Connect');
       }
+      
+      console.log('TON Connect успешно инициализирован');
+      this.isInitialized = true;
+
+      // После успешной инициализации пробуем восстановить соединение
+      this.tryRestoreConnection();
+      
+      return true;
     } catch (error) {
       console.error('Ошибка при инициализации TON Connect:', error);
 
@@ -106,28 +130,19 @@ class TelegramWalletConnector {
       }
 
       console.log('Попытка восстановить предыдущее подключение кошелька...');
+      
+      // Восстанавливаем предпочитаемый кошелек
+      this.restorePreferredWallet();
+      
+      // Пытаемся восстановить соединение с кошельком
       const restored = await this.connector.restoreConnection();
       
       if (restored) {
         console.log('Подключение кошелька успешно восстановлено');
-        this.connector.onStatusChange((wallet) => {
-          if (wallet) {
-            // Сохраняем информацию о подключенном кошельке
-            this.saveWalletData(wallet);
-            
-            // Отправляем событие о смене статуса подключения
-            const event = new CustomEvent('walletStatusChanged', {
-              detail: { connected: true, wallet }
-            });
-            document.dispatchEvent(event);
-          } else {
-            // Отправляем событие об отключении кошелька
-            const event = new CustomEvent('walletStatusChanged', {
-              detail: { connected: false }
-            });
-            document.dispatchEvent(event);
-          }
-        });
+        
+        // Устанавливаем обработчик изменения статуса подключения
+        this.setupWalletStatusChangeListener();
+        
         return true;
       } else {
         console.log('Не удалось восстановить предыдущее подключение');
@@ -138,43 +153,67 @@ class TelegramWalletConnector {
       return false;
     }
   }
+  
+  // Настройка слушателя событий изменения статуса кошелька
+  setupWalletStatusChangeListener() {
+    if (!this.connector) return;
+    
+    this.connector.onStatusChange((wallet) => {
+      if (wallet) {
+        console.log('Кошелек подключен:', wallet);
+        // Сохраняем информацию о подключенном кошельке
+        this.saveWalletData(wallet);
+        
+        // Отправляем событие о подключении кошелька
+        const event = new CustomEvent('walletConnected', {
+          detail: { wallet }
+        });
+        document.dispatchEvent(event);
+      } else {
+        console.log('Кошелек отключен');
+        // Удаляем сохраненные данные
+        this.saveWalletData(null);
+        
+        // Отправляем событие об отключении кошелька
+        const event = new CustomEvent('walletDisconnected');
+        document.dispatchEvent(event);
+      }
+    });
+  }
 
   // Получение списка доступных кошельков
   async getWallets() {
     try {
       if (!this.isInitialized || !this.connector) {
         console.log('Коннектор не инициализирован, невозможно получить список кошельков');
-        return [];
+        const initialized = await this.initConnector();
+        if (!initialized) return [];
       }
       
-      // Проверяем, есть ли метод getWallets в коннекторе
-      if (typeof this.connector.getWallets === 'function') {
-        const wallets = await this.connector.getWallets();
-        console.log('Получен список доступных кошельков:', wallets);
-        return wallets;
-      } else {
-        // Возвращаем стандартный список, если метод отсутствует
-        console.log('Метод getWallets не найден в коннекторе, используем стандартный список');
-        return [
-          {
-            name: 'Telegram Wallet',
-            universalLink: 'https://t.me/wallet',
-            bridgeUrl: 'https://bridge.tonapi.io/bridge',
-            aboutUrl: 'https://t.me/wallet',
-            imageUrl: 'https://wallet.tg/images/logo_filled.svg'
-          },
-          {
-            name: 'Tonkeeper',
-            universalLink: 'https://app.tonkeeper.com/ton-connect',
-            bridgeUrl: 'https://bridge.tonapi.io/bridge',
-            aboutUrl: 'https://tonkeeper.com',
-            imageUrl: 'https://tonkeeper.com/assets/tonconnect-icon.png'
-          }
-        ];
-      }
+      // Получаем список кошельков
+      const wallets = await this.connector.getWallets();
+      console.log('Получен список доступных кошельков:', wallets);
+      return wallets;
     } catch (error) {
       console.error('Ошибка при получении списка кошельков:', error);
-      return [];
+      
+      // В случае ошибки возвращаем стандартный список
+      return [
+        {
+          name: 'Telegram Wallet',
+          universalLink: 'https://t.me/wallet',
+          bridgeUrl: 'https://bridge.tonapi.io/bridge',
+          aboutUrl: 'https://t.me/wallet',
+          imageUrl: 'https://wallet.tg/images/logo_filled.svg'
+        },
+        {
+          name: 'Tonkeeper',
+          universalLink: 'https://app.tonkeeper.com/ton-connect',
+          bridgeUrl: 'https://bridge.tonapi.io/bridge',
+          aboutUrl: 'https://tonkeeper.com',
+          imageUrl: 'https://tonkeeper.com/assets/tonconnect-icon.png'
+        }
+      ];
     }
   }
 
@@ -182,12 +221,15 @@ class TelegramWalletConnector {
   async connectWallet(walletName = null) {
     try {
       if (!this.isInitialized || !this.connector) {
-        throw new Error('Коннектор не инициализирован');
+        const initialized = await this.initConnector();
+        if (!initialized) {
+          throw new Error('Не удалось инициализировать TON Connect');
+        }
       }
 
       // Получаем список доступных кошельков
       const walletsList = await this.getWallets();
-      console.log('Доступные кошельки:', walletsList);
+      console.log('Доступные кошельки для подключения:', walletsList);
       
       // Определяем кошелек для подключения
       let selectedWallet = null;
@@ -221,53 +263,46 @@ class TelegramWalletConnector {
       
       console.log(`Выбран кошелек для подключения: ${selectedWallet.name}`);
       
-      // Регистрируем обработчик события изменения статуса
-      this.connector.onStatusChange((wallet) => {
-        if (wallet) {
-          console.log('Кошелек подключен:', wallet);
-          // Сохраняем информацию о подключенном кошельке
-          this.saveWalletData(wallet);
-          
-          // Отправляем событие о подключении кошелька
-          const event = new CustomEvent('walletConnected', {
-            detail: { wallet }
-          });
-          document.dispatchEvent(event);
-        } else {
-          console.log('Кошелек отключен');
-          // Отправляем событие об отключении кошелька
-          const event = new CustomEvent('walletDisconnected');
-          document.dispatchEvent(event);
-        }
-      });
+      // Настраиваем обработчик изменения статуса
+      this.setupWalletStatusChangeListener();
       
       // Подключаемся к выбранному кошельку
       const connectOptions = {
-        universalLink: selectedWallet.universalLink
+        universalLink: selectedWallet.universalLink,
+        bridgeUrl: selectedWallet.bridgeUrl
       };
       
-      const { universal } = await this.connector.connect(connectOptions);
-      console.log('Получена универсальная ссылка для подключения:', universal);
-
-      // Эмитируем событие для родительского окна
-      window.parent.postMessage(
-        {
-          type: 'ton-connect',
-          universal,
-          method: 'connect',
-          wallet: selectedWallet.name
-        }, 
-        '*'
-      );
-
-      // Перенаправляем пользователя для подключения кошелька
-      window.open(universal, '_blank');
+      const connectResult = await this.connector.connect(connectOptions);
+      console.log('Результат запроса на подключение:', connectResult);
       
-      return {
-        success: true,
-        walletName: selectedWallet.name,
-        universal
-      };
+      if (connectResult && connectResult.universal) {
+        console.log('Получена универсальная ссылка для подключения:', connectResult.universal);
+        
+        // Перенаправляем пользователя для подключения кошелька
+        if (window.parent && window.parent !== window) {
+          // Если страница загружена в iframe, отправляем сообщение родителю
+          window.parent.postMessage(
+            {
+              type: 'ton-connect',
+              universal: connectResult.universal,
+              method: 'connect',
+              wallet: selectedWallet.name
+            }, 
+            '*'
+          );
+        } else {
+          // Иначе открываем ссылку в новом окне/вкладке
+          window.open(connectResult.universal, '_blank');
+        }
+        
+        return {
+          success: true,
+          walletName: selectedWallet.name,
+          universal: connectResult.universal
+        };
+      } else {
+        throw new Error('Не удалось получить ссылку для подключения кошелька');
+      }
     } catch (error) {
       console.error('Ошибка при подключении кошелька:', error);
       
@@ -304,10 +339,14 @@ class TelegramWalletConnector {
    */
   getWalletInfo() {
     try {
-      if (!this.isInitialized || !this.connector) {
-        return null;
+      if (!this.isInitialized) return null;
+      
+      // Проверяем информацию о кошельке из коннектора
+      if (this.connector && this.connector.wallet) {
+        return this.connector.wallet;
       }
       
+      // Если в коннекторе нет информации, проверяем localStorage
       const savedData = localStorage.getItem(this.storageKey);
       if (savedData) {
         const data = JSON.parse(savedData);
@@ -328,6 +367,7 @@ class TelegramWalletConnector {
    * @returns {boolean} - True, если кошелек подключен
    */
   isWalletConnected() {
+    // Для совместимости с интерфейсом возвращаем булево значение
     const walletInfo = this.getWalletInfo();
     return !!walletInfo;
   }
@@ -347,13 +387,22 @@ class TelegramWalletConnector {
         throw new Error('Кошелек не подключен');
       }
       
-      // Проверяем, есть ли метод sendTransaction в коннекторе
-      if (typeof this.connector.sendTransaction === 'function') {
-        console.log('Отправка транзакции через коннектор:', transaction);
-        return await this.connector.sendTransaction(transaction);
-      } else {
-        throw new Error('Метод sendTransaction не поддерживается');
+      console.log('Отправка транзакции через TON Connect:', transaction);
+      
+      // Проверяем, что транзакция имеет правильный формат для TON Connect
+      if (!transaction.validUntil) {
+        // Устанавливаем срок действия транзакции по умолчанию (5 минут)
+        transaction.validUntil = Math.floor(Date.now() / 1000) + 300;
       }
+      
+      // Отправляем транзакцию через коннектор
+      const result = await this.connector.sendTransaction(transaction);
+      console.log('Результат отправки транзакции:', result);
+      
+      return {
+        success: true,
+        transaction: result
+      };
     } catch (error) {
       console.error('Ошибка при отправке транзакции:', error);
       return {
@@ -382,75 +431,56 @@ class TelegramWalletConnector {
         throw new Error('Не указаны обязательные поля покупки: itemId, price');
       }
       
-      // Проверяем, есть ли метод purchaseItem в коннекторе
-      if (typeof this.connector.purchaseItem === 'function') {
-        console.log('Покупка товара через коннектор:', purchase);
-        const result = await this.connector.purchaseItem(purchase);
-        
-        // Если покупка успешна, отправляем событие
-        if (result.success) {
-          const event = new CustomEvent('purchaseCompleted', {
-            detail: {
-              ...purchase,
-              timestamp: Date.now(),
-              wallet: this.getWalletInfo()
-            }
-          });
-          document.dispatchEvent(event);
-        }
-        
-        return result;
-      } else {
-        // Если метод не поддерживается, пытаемся выполнить транзакцию напрямую
-        console.log('Метод purchaseItem не поддерживается, используем sendTransaction');
-        
-        // Преобразуем цену из TON в наноТОН
-        const priceNano = String(parseFloat(purchase.price) * 1000000000);
-        
-        // Формируем транзакцию
-        const transaction = {
-          messages: [{
-            address: purchase.receiptAddress || 'EQDrjaLahLkMB-hMCmkzOyBuHJ139ZUYmPHu6RRBKnbdLIYI',
-            amount: priceNano,
-            payload: JSON.stringify({
-              type: 'purchase',
-              item_id: purchase.itemId,
-              item_name: purchase.itemName || 'Unknown Item',
-              timestamp: Date.now()
-            })
-          }]
+      console.log('Запрос на покупку товара:', purchase);
+      
+      // Преобразуем цену из TON в наноТОН
+      const priceNano = String(parseFloat(purchase.price) * 1000000000);
+      
+      // Формируем транзакцию для покупки товара
+      const transaction = {
+        validUntil: Math.floor(Date.now() / 1000) + 300, // 5 минут
+        messages: [{
+          address: purchase.receiptAddress || 'EQDrjaLahLkMB-hMCmkzOyBuHJ139ZUYmPHu6RRBKnbdLIYI',
+          amount: priceNano,
+          payload: JSON.stringify({
+            type: 'purchase',
+            item_id: purchase.itemId,
+            item_name: purchase.itemName || 'Unknown Item',
+            timestamp: Date.now()
+          })
+        }]
+      };
+      
+      // Отправляем транзакцию через коннектор
+      const result = await this.sendTransaction(transaction);
+      
+      // Если транзакция успешна, сохраняем информацию о покупке и отправляем событие
+      if (result.success) {
+        const purchaseData = {
+          itemId: purchase.itemId,
+          itemName: purchase.itemName || 'Unknown Item',
+          price: purchase.price,
+          timestamp: Date.now(),
+          transactionHash: result.transaction?.boc || 'unknown',
+          wallet: this.getWalletInfo()
         };
         
-        const result = await this.sendTransaction(transaction);
+        this.savePurchaseHistory(purchaseData);
         
-        // Если транзакция успешна, сохраняем информацию о покупке и отправляем событие
-        if (result.success) {
-          const purchaseData = {
-            itemId: purchase.itemId,
-            itemName: purchase.itemName || 'Unknown Item',
-            price: purchase.price,
-            timestamp: Date.now(),
-            transactionHash: result.transaction?.boc || 'unknown',
-            wallet: this.getWalletInfo()
-          };
-          
-          this.savePurchaseHistory(purchaseData);
-          
-          const event = new CustomEvent('purchaseCompleted', {
-            detail: purchaseData
-          });
-          document.dispatchEvent(event);
-        }
-        
-        return {
-          ...result,
-          purchase: {
-            itemId: purchase.itemId,
-            itemName: purchase.itemName,
-            price: purchase.price
-          }
-        };
+        const event = new CustomEvent('purchaseCompleted', {
+          detail: purchaseData
+        });
+        document.dispatchEvent(event);
       }
+      
+      return {
+        ...result,
+        purchase: {
+          itemId: purchase.itemId,
+          itemName: purchase.itemName,
+          price: purchase.price
+        }
+      };
     } catch (error) {
       console.error('Ошибка при покупке товара:', error);
       return {
@@ -509,6 +539,37 @@ class TelegramWalletConnector {
       return [];
     }
   }
+  
+  /**
+   * Форматирование суммы в TON
+   * @param {string|number} nanotons - Сумма в наноТОН
+   * @returns {string} - Форматированная строка в TON
+   */
+  formatTON(nanotons) {
+    try {
+      const amount = BigInt(nanotons);
+      return (Number(amount) / 1000000000).toFixed(4);
+    } catch (error) {
+      return '0';
+    }
+  }
+  
+  /**
+   * Сокращение адреса кошелька
+   * @param {string} address - Полный адрес кошелька
+   * @returns {string} - Сокращенный адрес
+   */
+  shortenAddress(address) {
+    if (!address || typeof address !== 'string') {
+      return '';
+    }
+    
+    if (address.length <= 12) {
+      return address;
+    }
+    
+    return address.slice(0, 6) + '...' + address.slice(-6);
+  }
 }
 
 // Создаем глобальный объект telegramWalletConnector
@@ -518,5 +579,5 @@ window.walletConnector = window.telegramWalletConnector;
 // Инициализируем коннектор при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
   // Добавляем задержку перед инициализацией, чтобы скрипты успели загрузиться
-  setTimeout(() => window.walletConnector.initConnector(), 2000);
+  setTimeout(() => window.walletConnector.initConnector(), 500);
 }); 
