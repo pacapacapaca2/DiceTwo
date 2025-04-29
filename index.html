@@ -254,6 +254,253 @@
             z-index: 100;
         }
     </style>
+    <style>
+        /* Стили для футера */
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--tg-theme-bg-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px 0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+        
+        /* Стили для карты приключений */
+        .adventure-map {
+            background-color: var(--tg-theme-secondary-bg-color);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .location-title {
+            font-weight: bold;
+            color: var(--tg-theme-link-color);
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .map-container {
+            position: relative;
+            padding: 10px 0;
+        }
+        
+        .map-path {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+        
+        .map-path:before {
+            content: '';
+            position: absolute;
+            height: 4px;
+            background-color: rgba(255, 255, 255, 0.1);
+            width: 100%;
+            top: 18px;
+            z-index: 1;
+            border-radius: 2px;
+        }
+        
+        .map-node {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--tg-theme-bg-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .node-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--tg-theme-hint-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--tg-theme-bg-color);
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .node-label {
+            font-size: 11px;
+            color: var(--tg-theme-hint-color);
+            margin-top: 5px;
+            white-space: nowrap;
+        }
+        
+        .map-node.completed .node-icon {
+            background-color: #4CAF50;
+        }
+        
+        .map-node.current .node-icon {
+            background-color: var(--tg-theme-button-color);
+            animation: pulse 2s infinite;
+        }
+        
+        .map-node.locked .node-icon {
+            background-color: var(--tg-theme-hint-color);
+            opacity: 0.5;
+        }
+        
+        .map-node.boss .node-icon {
+            background-color: #E53935;
+        }
+        
+        /* Стили для карточки миссии */
+        .mission-card {
+            background-color: var(--tg-theme-secondary-bg-color);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--tg-theme-button-color);
+        }
+        
+        .mission-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .mission-title {
+            font-weight: bold;
+            color: var(--tg-theme-text-color);
+            font-size: 16px;
+        }
+        
+        .mission-difficulty {
+            color: var(--tg-theme-link-color);
+            font-size: 14px;
+        }
+        
+        .mission-description {
+            color: var(--tg-theme-hint-color);
+            font-size: 14px;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        
+        .mission-rewards {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .reward-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .reward-icon {
+            font-size: 16px;
+        }
+        
+        .reward-value {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color);
+        }
+        
+        .reward-item.artifact {
+            border: 1px dashed var(--tg-theme-link-color);
+        }
+        
+        /* Стили для коллекции артефактов */
+        .collection-preview {
+            background-color: var(--tg-theme-secondary-bg-color);
+            border-radius: A12px;
+            padding: 15px;
+            margin: 15px 0 80px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .collection-title {
+            font-weight: bold;
+            color: var(--tg-theme-text-color);
+            margin-bottom: 10px;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .collection-count {
+            color: var(--tg-theme-hint-color);
+            font-size: 14px;
+        }
+        
+        .artifacts-container {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 5px 0;
+            scrollbar-width: none;
+        }
+        
+        .artifacts-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .artifact-item {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background-color: var(--tg-theme-bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .artifact-icon {
+            font-size: 24px;
+        }
+        
+        .artifact-item.locked {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--tg-theme-hint-color);
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Стили для подсветки результатов */
+        .success-result {
+            color: #4CAF50 !important;
+            animation: pulse 0.5s;
+        }
+        
+        .failure-result {
+            color: #E53935 !important;
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+    </style>
 </head>
 <body ontouchstart="" class="okxc-using-mouse tc-using-mouse" style="top: auto;">
     <div id="root">
@@ -265,8 +512,8 @@
                          <div id="app">
                             <div id="game-container">
                                 <div class="game-header">
-                                    <h1 class="game-title">Dice Challenge</h1>
-                                    <p class="game-subtitle">Бросай кубики и собирай звёзды</p>
+                                    <h1 class="game-title">Dice Adventure</h1>
+                                    <p class="game-subtitle">Исследуй мир, сражайся с боссами и собирай артефакты</p>
                                 </div>
                                 
                                 <div class="player-progress">
@@ -276,6 +523,58 @@
                                     </div>
                                     <div class="progress-bar">
                                         <div class="progress-fill" style="width: 60%;"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="adventure-map">
+                                    <div class="location-title">Туманные равнины</div>
+                                    <div class="map-container">
+                                        <div class="map-path">
+                                            <div class="map-node completed">
+                                                <div class="node-icon">✓</div>
+                                                <div class="node-label">Деревня</div>
+                                            </div>
+                                            <div class="map-node completed">
+                                                <div class="node-icon">✓</div>
+                                                <div class="node-label">Лес</div>
+                                            </div>
+                                            <div class="map-node current">
+                                                <div class="node-icon">!</div>
+                                                <div class="node-label">Пещера</div>
+                                            </div>
+                                            <div class="map-node locked">
+                                                <div class="node-icon">?</div>
+                                                <div class="node-label">Руины</div>
+                                            </div>
+                                            <div class="map-node boss locked">
+                                                <div class="node-icon">⚔️</div>
+                                                <div class="node-label">Босс</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mission-card">
+                                    <div class="mission-header">
+                                        <div class="mission-title">Загадка пещеры</div>
+                                        <div class="mission-difficulty">★★☆</div>
+                                    </div>
+                                    <div class="mission-description">
+                                        Исследуй темную пещеру и найди древний артефакт. Бросай кубики, чтобы преодолеть препятствия!
+                                    </div>
+                                    <div class="mission-rewards">
+                                        <div class="reward-item">
+                                            <div class="reward-icon">🏆</div>
+                                            <div class="reward-value">+25 опыта</div>
+                                        </div>
+                                        <div class="reward-item">
+                                            <div class="reward-icon">💎</div>
+                                            <div class="reward-value">×3 кристалла</div>
+                                        </div>
+                                        <div class="reward-item artifact">
+                                            <div class="reward-icon">🔮</div>
+                                            <div class="reward-value">Амулет силы</div>
+                                        </div>
                                     </div>
                                 </div>
                                 
@@ -302,9 +601,30 @@
                                     <div class="animation-container" id="animation-container"></div>
                                 </div>
                                 
-                                <div id="result" style="display: none;">Начни игру!</div>
+                                <div id="result" style="display: none;">Начни испытание!</div>
                                 
-                                <button id="roll-button">Бросить кубики</button>
+                                <button id="roll-button">Начать испытание</button>
+                                
+                                <div class="collection-preview">
+                                    <div class="collection-title">Артефакты <span class="collection-count">3/12</span></div>
+                                    <div class="artifacts-container">
+                                        <div class="artifact-item collected">
+                                            <div class="artifact-icon">🗡️</div>
+                                        </div>
+                                        <div class="artifact-item collected">
+                                            <div class="artifact-icon">🛡️</div>
+                                        </div>
+                                        <div class="artifact-item collected">
+                                            <div class="artifact-icon">📜</div>
+                                        </div>
+                                        <div class="artifact-item locked">
+                                            <div class="artifact-icon">?</div>
+                                        </div>
+                                        <div class="artifact-item locked">
+                                            <div class="artifact-icon">?</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <style>
                                 @keyframes fadeBottomInUpAlert {
