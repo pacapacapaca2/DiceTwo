@@ -27,9 +27,12 @@ class TelegramWalletConnector {
     }
 
     try {
+      console.log("Начинаем инициализацию TON Connect...");
+      
       // Сначала пробуем использовать tonconnect из window
       if (window.tonconnect) {
         try {
+          console.log("Обнаружен tonconnect в window, пробуем использовать его");
           const fullManifestUrl = new URL(this.tonConnectManifestUrl, window.location.href).href;
           this.connector = window.tonconnect.createConnector({
             manifestUrl: fullManifestUrl
@@ -49,6 +52,7 @@ class TelegramWalletConnector {
       
       if (TonConnectConstructor) {
         try {
+          console.log("Обнаружен TonConnect в глобальном объекте, пробуем использовать его");
           const fullManifestUrl = new URL(this.tonConnectManifestUrl, window.location.href).href;
           this.connector = new TonConnectConstructor({
             manifestUrl: fullManifestUrl
@@ -62,6 +66,7 @@ class TelegramWalletConnector {
       }
       
       // Если ни один из методов не сработал, загружаем SDK динамически
+      console.log("Не удалось найти TON Connect в глобальном окружении, загружаем скрипт динамически");
       await this.loadTonConnectScript();
       
       // Даем время на инициализацию скрипта
@@ -78,6 +83,7 @@ class TelegramWalletConnector {
   // Повторная попытка инициализации после загрузки скрипта
   async retryInitialization() {
     try {
+      console.log("Повторная попытка инициализации после загрузки скрипта");
       // Проверяем наличие tonconnect
       if (window.tonconnect) {
         const fullManifestUrl = new URL(this.tonConnectManifestUrl, window.location.href).href;
@@ -104,6 +110,7 @@ class TelegramWalletConnector {
         return true;
       }
       
+      console.error("TON Connect SDK не был успешно загружен");
       return false;
     } catch (error) {
       console.error('Retry initialization error:', error);
@@ -138,67 +145,107 @@ class TelegramWalletConnector {
     return new Promise((resolve) => {
       // Проверяем, есть ли уже загруженный SDK
       if (window.tonconnect || typeof TonConnect !== 'undefined' || window.TonConnect) {
+        console.log("TON Connect SDK уже загружен, пропускаем загрузку");
         resolve();
         return;
       }
       
       // Проверяем, существует ли уже скрипт в DOM
       if (document.querySelector('script[src*="tonconnect"]')) {
+        console.log("Скрипт TON Connect уже добавлен в DOM, ожидаем загрузку");
         setTimeout(resolve, 1000);
         return;
       }
       
-      // Загружаем основной скрипт
-      const script = document.createElement('script');
-      script.src = 'https://tonconnect.github.io/sdk/tonconnect-web.js';
-      script.async = true;
+      console.log("Начинаем загрузку TON Connect SDK...");
       
-      // Функция завершения загрузки
-      const finishLoading = () => {
-        setTimeout(resolve, 1000);
+      // Массив источников скриптов в порядке приоритета
+      const scriptSources = [
+        // Используем сначала официальный CDN с фиксированной версией SDK (более стабильный подход)
+        'https://unpkg.com/@tonconnect/sdk@2.1.3/dist/tonconnect-sdk.min.js',
+        // Затем пробуем альтернативные источники
+        'https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect-sdk.min.js',
+        'https://tonconnect.github.io/sdk/tonconnect-web.js'
+      ];
+      
+      // Счетчик попыток загрузки
+      let attemptIndex = 0;
+      
+      // Функция для загрузки скрипта
+      const loadScript = (src) => {
+        console.log(`Пробуем загрузить TON Connect SDK из источника: ${src}`);
+        
+        const script = document.createElement('script');
+        script.src = src;
+        script.async = true;
+        
+        script.onload = () => {
+          console.log(`TON Connect SDK успешно загружен из ${src}`);
+          // Проверяем, что SDK действительно загрузился
+          setTimeout(() => {
+            if (window.tonconnect || typeof TonConnect !== 'undefined' || window.TonConnect) {
+              console.log("TON Connect SDK доступен после загрузки");
+              resolve();
+            } else {
+              console.warn("TON Connect SDK загружен, но не доступен в глобальном объекте");
+              tryNextSource();
+            }
+          }, 500);
+        };
+        
+        script.onerror = () => {
+          console.warn(`Ошибка загрузки TON Connect SDK из ${src}`);
+          tryNextSource();
+        };
+        
+        document.head.appendChild(script);
       };
       
-      script.onload = finishLoading;
-      
-      script.onerror = () => {
-        // При ошибке пробуем альтернативный источник
-        const alternativeScript = document.createElement('script');
-        alternativeScript.src = 'https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect-sdk.min.js';
-        alternativeScript.async = true;
-        
-        alternativeScript.onload = finishLoading;
-        alternativeScript.onerror = finishLoading; // Даже при ошибке продолжаем (мб один из скриптов все же загрузился)
-        
-        document.head.appendChild(alternativeScript);
+      // Функция для попытки загрузки из следующего источника
+      const tryNextSource = () => {
+        attemptIndex++;
+        if (attemptIndex < scriptSources.length) {
+          loadScript(scriptSources[attemptIndex]);
+        } else {
+          console.error("Не удалось загрузить TON Connect SDK из всех источников");
+          resolve(); // Завершаем промис, чтобы не блокировать выполнение
+        }
       };
       
-      document.head.appendChild(script);
+      // Начинаем с первого источника
+      loadScript(scriptSources[0]);
     });
   }
 
   async connectWallet() {
     if (!this.isInitialized) {
+      console.log("Инициализируем перед подключением кошелька");
       const initialized = await this.initialize();
       if (!initialized) {
+        console.error("Не удалось инициализировать TON Connect");
         return false;
       }
     }
 
     try {
       if (this.connector.connected) {
+        console.log("Кошелек уже подключен");
         return true;
       }
 
       // Получаем список доступных кошельков
       let wallets;
       try {
+        console.log("Запрашиваем список доступных кошельков");
         wallets = await this.connector.getWallets();
+        console.log("Доступные кошельки:", wallets);
       } catch (walletsError) {
         console.error('Error getting wallet list:', walletsError);
         return false;
       }
       
       if (!wallets || wallets.length === 0) {
+        console.error("Нет доступных кошельков");
         return false;
       }
       
@@ -211,16 +258,30 @@ class TelegramWalletConnector {
       
       if (!tonkeeperWallet) {
         // Используем первый доступный кошелек
+        console.log("Кошелек Tonkeeper не найден, используем первый доступный кошелек");
         tonkeeperWallet = wallets[0];
+      } else {
+        console.log("Найден кошелек:", tonkeeperWallet.name);
       }
       
       // Формируем ссылку для подключения и открываем её
       try {
-        const universalLink = this.connector.connect({
+        console.log("Формируем универсальную ссылку для подключения");
+        
+        // Настройки связи с кошельком
+        const connectionOptions = {
           universalLink: tonkeeperWallet.universalLink,
           bridgeUrl: tonkeeperWallet.bridgeUrl
-        });
+        };
         
+        console.log("Параметры подключения:", connectionOptions);
+        
+        // Создаем универсальную ссылку
+        const universalLink = this.connector.connect(connectionOptions);
+        
+        console.log("Сгенерирована ссылка для подключения:", universalLink);
+        
+        // Открываем ссылку для подключения
         window.location.href = universalLink;
         return true;
       } catch (connectError) {

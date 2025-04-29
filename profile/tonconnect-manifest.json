@@ -1,7 +1,7 @@
 {
-  "url": "https://pacapacapaca2.github.io/DiceTwo/",
+  "url": "https://dicetwo.ton",
   "name": "DiceTwo",
-  "iconUrl": "https://pacapacapaca2.github.io/DiceTwo/assets/images/dice-icon.svg",
-  "termsOfUseUrl": "https://pacapacapaca2.github.io/DiceTwo/terms",
-  "privacyPolicyUrl": "https://pacapacapaca2.github.io/DiceTwo/privacy"
+  "iconUrl": "../assets/images/dice-icon.svg",
+  "termsOfUseUrl": "../terms.html",
+  "privacyPolicyUrl": "../privacy.html"
 } 

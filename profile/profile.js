@@ -149,14 +149,32 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
       
       // Анимация вращения для индикатора загрузки
-      const style = document.createElement('style');
-      style.textContent = `
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `;
-      document.head.appendChild(style);
+      if (!document.getElementById('spin-animation')) {
+        const style = document.createElement('style');
+        style.id = 'spin-animation';
+        style.textContent = `
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `;
+        document.head.appendChild(style);
+      }
+      
+      // Проверяем доступность SDK перед подключением
+      const sdkAvailable = checkTonConnectAvailability();
+      if (!sdkAvailable) {
+        console.log("Повторная попытка загрузки SDK...");
+        
+        // Пробуем добавить SDK напрямую из CDN
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/@tonconnect/sdk@2.1.3/dist/tonconnect-sdk.min.js';
+        script.async = true;
+        document.head.appendChild(script);
+        
+        // Даем время на загрузку скрипта
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
       
       // Подключаем кошелек через TON Connect
       console.log("Вызываем метод connectWallet у telegramWalletConnector");
@@ -165,8 +183,18 @@ document.addEventListener("DOMContentLoaded", () => {
       
       if (connected) {
         console.log("Соединение инициировано успешно, ожидаем ответа от TON Connect");
-        // Индикатор загрузки остается, пока TON Connect не вернет результат подключения
-        // Обработка статуса подключения происходит через событие walletStatusChange
+        
+        // Устанавливаем таймаут для проверки статуса подключения
+        setTimeout(async () => {
+          const isConnectedAfterAttempt = await telegramWalletConnector.isWalletConnected();
+          
+          // Если по каким-то причинам не получили событие walletStatusChange
+          if (!isConnectedAfterAttempt) {
+            console.warn("Не получено подтверждение подключения от кошелька");
+            updateWalletStatus(false);
+            showConnectionNotification(false);
+          }
+        }, 30000); // 30 секунд таймаут
       } else {
         console.error("Не удалось инициировать подключение кошелька");
         // Возвращаем кнопку в исходное состояние в случае ошибки
