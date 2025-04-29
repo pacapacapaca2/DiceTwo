@@ -1,45 +1,29 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" style="--tg-theme-accent-text-color: #6ab2f2; --tg-color-scheme:
+ dark; --tg-theme-bg-color: #17212b; --tg-theme-bottom-bar-bg-color: #17212b; 
+ --tg-theme-button-color: #5288c1; --tg-theme-button-text-color: #ffffff; 
+ --tg-theme-destructive-text-color: #ec3942; --tg-theme-header-bg-color: 
+ #17212b; --tg-theme-hint-color: #708499; --tg-theme-link-color: #6ab3f3; 
+ --tg-theme-secondary-bg-color: #232e3c; --tg-theme-section-bg-color: #17212b;
+ --tg-theme-section-header-text-color: #6ab3f3; --tg-theme-section-separator-color:
+  #111921; --tg-theme-subtitle-text-color: #708499; --tg-theme-text-color: #f5f5f5; 
+  --tg-viewport-height: 1040px; --tg-viewport-stable-height: 1040px; --tg-safe-area-inset-top: 
+  0px; --tg-safe-area-inset-bottom: 0px; --tg-safe-area-inset-left: 0px; --tg-safe-area-inset-right: 0px; 
+  --tg-content-safe-area-inset-top: 0px; --tg-content-safe-area-inset-bottom: 0px; --tg-content-safe-area-inset-left: 0px; 
+  --tg-content-safe-area-inset-right: 0px;">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
     <title>Профиль - DiceTwo</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- Подключение Telegram Web App -->
+    <script src="https://telegram.org/js/telegram-web-app-beta.js"></script>
+    <script>window.Telegram.WebApp.expand();</script>
+    
     <!-- Подключение TON Connect SDK -->
     <script src="ton-connect-sdk.js"></script>
-    <!-- Настройка модуля TON Connect -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof window.TonConnectSDK !== 'undefined') {
-                console.log('TON Connect SDK успешно загружен:', window.TonConnectSDK);
-            } else {
-                console.error('Ошибка: TON Connect SDK не загружен!');
-                
-                // Создаем элемент ошибки и кнопку перезагрузки
-                const errorContainer = document.createElement('div');
-                errorContainer.className = 'error-container';
-                errorContainer.style.cssText = 'background: #ffebee; padding: 20px; border-radius: 8px; margin: 20px auto; max-width: 90%; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1);';
-                
-                const errorMessage = document.createElement('p');
-                errorMessage.textContent = 'Не удалось загрузить TON Connect SDK. Пожалуйста, перезагрузите страницу.';
-                errorMessage.style.cssText = 'color: #d32f2f; font-weight: bold; margin-bottom: 15px;';
-                
-                const reloadButton = document.createElement('button');
-                reloadButton.textContent = 'Перезагрузить';
-                reloadButton.style.cssText = 'background: #2196f3; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;';
-                reloadButton.onclick = function() {
-                    window.location.reload();
-                };
-                
-                errorContainer.appendChild(errorMessage);
-                errorContainer.appendChild(reloadButton);
-                
-                // Добавляем контейнер ошибки в начало body
-                document.body.insertBefore(errorContainer, document.body.firstChild);
-            }
-        });
-    </script>
     
     <!-- Скрипты приложения -->
     <script src="wallet-connect.js"></script>
@@ -292,20 +276,20 @@
             <div class="wallet-section">
                 <h2>Ваш кошелек</h2>
                 <div class="wallet-status">
-                    <div id="wallet-not-connected" class="wallet-status-message">
+                    <div class="wallet-status-message">
                         <p>Подключите кошелек TON для доступа к полному функционалу</p>
-                        <button id="connect-wallet-button" class="connect-wallet-btn">Подключить кошелек</button>
+                        <button class="connect-wallet-btn">Подключить кошелек</button>
                     </div>
-                    <div id="wallet-connected" class="wallet-status-message" style="display: none;">
-                        <div class="wallet-info">
-                            <div class="wallet-name">
-                                <img id="wallet-icon" src="assets/img/wallet-icon.svg" alt="Wallet">
-                                <span id="wallet-name">Telegram Wallet</span>
-                            </div>
-                            <div class="wallet-address" id="wallet-address">EQD...</div>
+                    
+                    <div class="wallet-info" style="display: none;">
+                        <div class="wallet-name">
+                            <img class="wallet-image" src="../assets/images/wallets/default-wallet.png" alt="Wallet">
+                            <span class="wallet-name">Не подключен</span>
                         </div>
+                        <div class="wallet-address">Не подключен</div>
+                        <div class="wallet-balance">0 TON</div>
                         <div class="wallet-actions">
-                            <button id="disconnect-wallet-button" class="disconnect-wallet-btn">Отключить</button>
+                            <button class="disconnect-wallet-btn" style="display: none;">Отключить кошелек</button>
                         </div>
                     </div>
                 </div>
@@ -332,14 +316,10 @@
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <div id="wallet-select" class="wallet-select" style="display: none;">
-            <h3 style="color: white; margin-bottom: 20px;">Выберите кошелек</h3>
-            <div class="wallets-list" id="wallets-list">
-                <!-- Wallet list items will be added here dynamically -->
+            
+            <div class="game-stats">
+                <!-- Здесь будет отображаться детальная статистика игр -->
             </div>
-            <button id="close-wallet-select" style="margin-top: 20px; padding: 10px 20px; background: transparent; border: 1px solid white; color: white; border-radius: 8px; cursor: pointer;">Отмена</button>
         </div>
     </div>
     
@@ -364,28 +344,8 @@
     </div>
     
     <script>
-        // Инициализация при загрузке страницы
+        // Инициализация Telegram WebApp
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('TON Connect SDK успешно загружен:', window.TonConnectSDK || 'TonConnect');
-            
-            // Инициализация кошелька
-            window.walletConnector = new TelegramWalletConnector();
-            
-            // Инициализация Telegram данных
-            initTelegramData();
-            
-            // Кнопка закрытия выбора кошелька
-            const closeWalletSelect = document.getElementById('close-wallet-select');
-            if (closeWalletSelect) {
-                closeWalletSelect.addEventListener('click', function() {
-                    document.getElementById('wallet-select').style.display = 'none';
-                });
-            }
-        });
-        
-        // Функция инициализации данных из Telegram
-        function initTelegramData() {
-            // Проверяем наличие Telegram Web App API
             if (window.Telegram && window.Telegram.WebApp) {
                 console.log('Telegram WebApp API найден');
                 
@@ -396,9 +356,6 @@
                 // Получение данных о пользователе
                 const initDataUnsafe = window.Telegram.WebApp.initDataUnsafe || {};
                 const user = initDataUnsafe.user || null;
-                
-                console.log('InitDataUnsafe доступен:', !!initDataUnsafe);
-                console.log('User доступен:', !!user);
                 
                 if (user) {
                     // Заполняем данные профиля
@@ -421,7 +378,7 @@
                     }
                 }
             }
-        }
+        });
     </script>
 </body>
 </html>
