@@ -6,7 +6,7 @@
     <title>Профиль - DiceTwo</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <!-- Подключение TON Connect SDK -->
-    <script src="./ton-connect-sdk.js"></script>
+    <script src="ton-connect-sdk.js"></script>
     <!-- Настройка модуля TON Connect -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -41,7 +41,6 @@
     </script>
     
     <!-- Скрипты приложения -->
-    <script src="assets/js/ton-connector.js"></script>
     <script src="wallet-connect.js"></script>
     <script src="assets/js/profile.js"></script>
 </head>
@@ -126,6 +125,8 @@
         // Инициализация при загрузке страницы
         document.addEventListener('DOMContentLoaded', function() {
             console.log('TON Connect SDK успешно загружен:', window.TonConnectSDK || 'TonConnect');
+            // Инициализация кошелька
+            window.walletConnector = new TelegramWalletConnector();
         });
     </script>
 </body>

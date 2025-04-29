@@ -4,7 +4,7 @@ class TelegramWalletConnector {
     this.connector = null;
     this.isInitialized = false;
     this.retryCount = 0;
-    this.manifestUrl = 'https://dicetwo.com/tonconnect-manifest.json';
+    this.manifestUrl = 'https://pacapacapaca2.github.io/DiceTwo/profile/tonconnect-manifest.json';
     this.preferredWalletName = 'Telegram Wallet';
     this.storageKey = 'ton-connect-wallet-data';
     this.purchaseHistoryKey = 'ton-connect-purchase-history';
@@ -19,49 +19,29 @@ class TelegramWalletConnector {
       console.log('Инициализация TON Connect...');
       
       // Проверка существования официального SDK 
-      if (typeof window.TonConnectSDK === 'undefined') {
-        console.log('Проверка наличия глобального объекта TonConnectSDK: не найден');
-        console.log('Проверка альтернативного объекта...');
-        
-        // Проверяем возможные пути импорта SDK
-        if (typeof window.tonconnect === 'undefined') {
-          console.log('Глобальный объект tonconnect не найден');
-          
-          if (typeof TonConnect === 'undefined') {
-            console.error('TON Connect SDK не обнаружен в глобальном пространстве имен');
-            throw new Error('TON Connect SDK не загружен');
-          } else {
-            console.log('Найден глобальный объект TonConnect');
-            // Используем найденный глобальный объект
-            window.tonconnect = {
-              createConnector: (options) => new TonConnect(options)
-            };
-          }
-        } else {
-          console.log('Найден глобальный объект tonconnect');
-        }
-      } else {
+      if (typeof window.TonConnectSDK !== 'undefined') {
         console.log('Найден глобальный объект TonConnectSDK');
-        // Если SDK доступен через TonConnectSDK, адаптируем его
-        window.tonconnect = window.TonConnectSDK;
-      }
+        
+        // Создание экземпляра коннектора
+        this.connector = new window.TonConnectSDK.TonConnect({
+          manifestUrl: this.manifestUrl
+        });
 
-      // Создание экземпляра коннектора
-      this.connector = window.tonconnect.createConnector({
-        manifestUrl: this.manifestUrl
-      });
-
-      if (!this.connector) {
-        throw new Error('Не удалось создать экземпляр TON Connect');
-      }
+        if (!this.connector) {
+          throw new Error('Не удалось создать экземпляр TON Connect');
+        }
       
-      console.log('TON Connect успешно инициализирован');
-      this.isInitialized = true;
+        console.log('TON Connect успешно инициализирован');
+        this.isInitialized = true;
 
-      // После успешной инициализации пробуем восстановить соединение
-      this.tryRestoreConnection();
+        // После успешной инициализации пробуем восстановить соединение
+        this.tryRestoreConnection();
       
-      return true;
+        return true;
+      } else {
+        console.log('Глобальный объект TonConnectSDK не найден');
+        throw new Error('TON Connect SDK не загружен');
+      }
     } catch (error) {
       console.error('Ошибка при инициализации TON Connect:', error);
 
@@ -190,7 +170,7 @@ class TelegramWalletConnector {
         if (!initialized) return [];
       }
       
-      // Получаем список кошельков
+      // Получаем список кошельков из экземпляра TonConnect
       const wallets = await this.connector.getWallets();
       console.log('Получен список доступных кошельков:', wallets);
       return wallets;

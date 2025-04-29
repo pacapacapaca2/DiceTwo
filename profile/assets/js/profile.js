@@ -16,17 +16,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const walletsList = document.getElementById('wallets-list');
     
     // Проверка загрузки TON Connect SDK
-    if (window.TonConnectSDK || typeof TonConnect !== 'undefined' || window.tonconnect) {
+    if (window.TonConnectSDK) {
         console.log('TON Connect SDK доступен в глобальном объекте window');
         
         // Определяем версию SDK
         let sdkVersion = 'не указана';
-        if (window.TonConnectSDK && window.TonConnectSDK.version) {
-            sdkVersion = window.TonConnectSDK.version;
-        } else if (typeof TonConnect !== 'undefined' && TonConnect.version) {
-            sdkVersion = TonConnect.version;
-        } else if (window.tonconnect && window.tonconnect.version) {
-            sdkVersion = window.tonconnect.version;
+        if (window.TonConnectSDK && window.TonConnectSDK.tonConnectSdkVersion) {
+            sdkVersion = window.TonConnectSDK.tonConnectSdkVersion;
         }
         console.log('Версия SDK:', sdkVersion);
     } else {
@@ -60,6 +56,12 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             // Очищаем список кошельков
             walletsList.innerHTML = '';
+            
+            // Проверяем доступность walletConnector
+            if (!window.walletConnector) {
+                console.error('Ошибка: walletConnector не инициализирован');
+                return;
+            }
             
             // Получаем список доступных кошельков
             const wallets = await window.walletConnector.getWallets();
@@ -96,14 +98,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         walletSelect.style.display = 'none';
                         
                         // Подключаем выбранный кошелек
-                        const result = await window.walletConnector.connectWallet(wallet.name);
+                        await window.walletConnector.connectWallet(wallet.name);
                         
-                        if (result.success) {
-                            console.log(`Запрос на подключение ${wallet.name} отправлен`);
-                        } else {
-                            console.error('Ошибка при подключении кошелька:', result.error);
-                            alert(`Ошибка: ${result.error}`);
-                        }
+                        console.log(`Запрос на подключение ${wallet.name} отправлен`);
                     } catch (error) {
                         console.error('Ошибка при подключении кошелька:', error);
                         alert('Ошибка при подключении кошелька');
@@ -132,11 +129,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (disconnectWalletButton) {
         disconnectWalletButton.addEventListener('click', async () => {
             try {
-                const result = await window.walletConnector.disconnectWallet();
-                if (result) {
-                    console.log('Кошелек успешно отключен');
-                    updateWalletUI(false);
-                }
+                await window.walletConnector.disconnectWallet();
+                console.log('Кошелек успешно отключен');
+                updateWalletUI(false);
             } catch (error) {
                 console.error('Ошибка при отключении кошелька:', error);
             }
@@ -196,6 +191,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Инициализация UI при загрузке страницы
     function initWalletState() {
+        if (!window.walletConnector) {
+            console.error('walletConnector не инициализирован');
+            return;
+        }
+        
         // Проверяем состояние подключения кошелька
         const isConnected = window.walletConnector.isWalletConnected();
         const walletInfo = window.walletConnector.getWalletInfo();
