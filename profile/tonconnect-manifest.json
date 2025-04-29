@@ -1,7 +1,7 @@
 {
   "url": "https://dicetwo.ton",
   "name": "DiceTwo",
-  "iconUrl": "../assets/images/dice-icon.svg",
-  "termsOfUseUrl": "../terms.html",
-  "privacyPolicyUrl": "../privacy.html"
+  "iconUrl": "https://dicetwo.ton/assets/images/dice-icon.svg",
+  "termsOfUseUrl": "https://dicetwo.ton/terms.html",
+  "privacyPolicyUrl": "https://dicetwo.ton/privacy.html"
 } 
