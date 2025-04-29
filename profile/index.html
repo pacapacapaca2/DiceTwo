@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Профиль - DiceTwo</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <!-- Подключение TON Connect SDK -->
     <script src="ton-connect-sdk.js"></script>
@@ -43,22 +44,256 @@
     <!-- Скрипты приложения -->
     <script src="wallet-connect.js"></script>
     <script src="assets/js/profile.js"></script>
+    
+    <style>
+        .profile-header {
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .profile-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            overflow: hidden;
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .profile-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .profile-photo .placeholder {
+            font-size: 40px;
+            color: #888;
+        }
+        
+        .profile-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .profile-username {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 15px;
+        }
+        
+        .wallet-section {
+            background-color: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .wallet-status-message {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .connect-wallet-btn {
+            background-color: #0088cc;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 15px;
+        }
+        
+        .connect-wallet-btn:hover {
+            background-color: #0077b3;
+        }
+        
+        .stats-section {
+            background-color: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #888;
+        }
+        
+        .wallet-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .wallet-name {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .wallet-name img {
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+        }
+        
+        .wallet-address {
+            font-size: 14px;
+            color: #0088cc;
+            margin-bottom: 15px;
+            word-break: break-all;
+        }
+        
+        .wallet-actions {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .disconnect-wallet-btn {
+            background-color: transparent;
+            color: #ff5252;
+            border: 1px solid #ff5252;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .disconnect-wallet-btn:hover {
+            background-color: rgba(255, 82, 82, 0.1);
+        }
+        
+        .wallet-select {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .wallets-list {
+            width: 100%;
+            max-width: 400px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        .wallet-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 10px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .wallet-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .wallet-item img {
+            width: 32px;
+            height: 32px;
+            margin-right: 12px;
+            border-radius: 6px;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(30, 30, 30, 0.9);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .nav-item {
+            text-align: center;
+            color: #888;
+            text-decoration: none;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .nav-item.active {
+            color: #0088cc;
+        }
+        
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+        
+        .main-content {
+            padding-bottom: 70px; /* Отступ для нижней навигации */
+        }
+    </style>
 </head>
 <body class="profile-page">
-    <div class="container profile-container">
-        <header class="profile-header">
-            <h1>Профиль игрока</h1>
-            <div class="back-button" onclick="window.location.href='../'">
-                <span>&larr;</span> Назад
+    <div class="main-content">
+        <div class="profile-header">
+            <div class="profile-photo" id="profile-photo">
+                <div class="placeholder">👤</div>
             </div>
-        </header>
+            <div class="profile-name" id="profile-name">Пользователь</div>
+            <div class="profile-username" id="profile-username">@username</div>
+        </div>
         
-        <main>
-            <section class="wallet-section">
+        <div class="container">
+            <div class="wallet-section">
                 <h2>Ваш кошелек</h2>
                 <div class="wallet-status">
                     <div id="wallet-not-connected" class="wallet-status-message">
-                        <p>Кошелек не подключен</p>
+                        <p>Подключите кошелек TON для доступа к полному функционалу</p>
                         <button id="connect-wallet-button" class="connect-wallet-btn">Подключить кошелек</button>
                     </div>
                     <div id="wallet-connected" class="wallet-status-message" style="display: none;">
@@ -74,17 +309,10 @@
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
             
-            <section class="wallet-select" id="wallet-select" style="display: none;">
-                <h3>Выберите кошелек</h3>
-                <div class="wallets-list" id="wallets-list">
-                    <!-- Wallet list items will be added here dynamically -->
-                </div>
-            </section>
-            
-            <section class="game-stats">
-                <h2>Статистика игры</h2>
+            <div class="stats-section">
+                <h2>Ваша статистика</h2>
                 <div class="stats-grid">
                     <div class="stat-item">
                         <div class="stat-value" id="total-games">0</div>
@@ -103,31 +331,97 @@
                         <div class="stat-label">Выиграно</div>
                     </div>
                 </div>
-            </section>
-            
-            <section class="game-history">
-                <h2>История игр</h2>
-                <div class="history-list" id="game-history-list">
-                    <div class="empty-history-message">
-                        История игр пуста
-                    </div>
-                    <!-- Game history items will be added here dynamically -->
-                </div>
-            </section>
-        </main>
+            </div>
+        </div>
         
-        <footer class="profile-footer">
-            <p>&copy; 2023 DiceTwo - Игра в кости на блокчейне TON</p>
-        </footer>
+        <div id="wallet-select" class="wallet-select" style="display: none;">
+            <h3 style="color: white; margin-bottom: 20px;">Выберите кошелек</h3>
+            <div class="wallets-list" id="wallets-list">
+                <!-- Wallet list items will be added here dynamically -->
+            </div>
+            <button id="close-wallet-select" style="margin-top: 20px; padding: 10px 20px; background: transparent; border: 1px solid white; color: white; border-radius: 8px; cursor: pointer;">Отмена</button>
+        </div>
+    </div>
+    
+    <!-- Нижняя навигационная панель -->
+    <div class="bottom-nav">
+        <a href="../index.html" class="nav-item">
+            <div class="nav-icon">🎲</div>
+            <div>Игра</div>
+        </a>
+        <a href="../earn/index.html" class="nav-item">
+            <div class="nav-icon">💎</div>
+            <div>Заработок</div>
+        </a>
+        <a href="../games/index.html" class="nav-item">
+            <div class="nav-icon">🎮</div>
+            <div>Игры</div>
+        </a>
+        <a href="#" class="nav-item active">
+            <div class="nav-icon">👤</div>
+            <div>Профиль</div>
+        </a>
     </div>
     
     <script>
         // Инициализация при загрузке страницы
         document.addEventListener('DOMContentLoaded', function() {
             console.log('TON Connect SDK успешно загружен:', window.TonConnectSDK || 'TonConnect');
+            
             // Инициализация кошелька
             window.walletConnector = new TelegramWalletConnector();
+            
+            // Инициализация Telegram данных
+            initTelegramData();
+            
+            // Кнопка закрытия выбора кошелька
+            const closeWalletSelect = document.getElementById('close-wallet-select');
+            if (closeWalletSelect) {
+                closeWalletSelect.addEventListener('click', function() {
+                    document.getElementById('wallet-select').style.display = 'none';
+                });
+            }
         });
+        
+        // Функция инициализации данных из Telegram
+        function initTelegramData() {
+            // Проверяем наличие Telegram Web App API
+            if (window.Telegram && window.Telegram.WebApp) {
+                console.log('Telegram WebApp API найден');
+                
+                // Настройка Telegram WebApp
+                window.Telegram.WebApp.ready();
+                window.Telegram.WebApp.expand();
+                
+                // Получение данных о пользователе
+                const initDataUnsafe = window.Telegram.WebApp.initDataUnsafe || {};
+                const user = initDataUnsafe.user || null;
+                
+                console.log('InitDataUnsafe доступен:', !!initDataUnsafe);
+                console.log('User доступен:', !!user);
+                
+                if (user) {
+                    // Заполняем данные профиля
+                    const profileName = document.getElementById('profile-name');
+                    const profileUsername = document.getElementById('profile-username');
+                    const profilePhoto = document.getElementById('profile-photo');
+                    
+                    if (profileName) {
+                        const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
+                        profileName.textContent = fullName || 'Пользователь';
+                    }
+                    
+                    if (profileUsername) {
+                        profileUsername.textContent = user.username ? '@' + user.username : '';
+                    }
+                    
+                    // Если есть аватар, отображаем его
+                    if (profilePhoto && user.photo_url) {
+                        profilePhoto.innerHTML = `<img src="${user.photo_url}" alt="Profile Photo">`;
+                    }
+                }
+            }
+        }
     </script>
 </body>
 </html>

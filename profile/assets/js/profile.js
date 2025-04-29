@@ -5,15 +5,20 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Initializing profile page...');
     
     // Элементы интерфейса
-    const connectWalletButton = document.getElementById('connect-wallet-button');
-    const disconnectWalletButton = document.getElementById('disconnect-wallet-button');
-    const walletNotConnected = document.getElementById('wallet-not-connected');
-    const walletConnected = document.getElementById('wallet-connected');
-    const walletName = document.getElementById('wallet-name');
-    const walletAddress = document.getElementById('wallet-address');
-    const walletIcon = document.getElementById('wallet-icon');
-    const walletSelect = document.getElementById('wallet-select');
-    const walletsList = document.getElementById('wallets-list');
+    const profileContainer = document.querySelector('.profile-container');
+    const connectWalletBtn = document.querySelector('.connect-wallet-btn');
+    const disconnectWalletBtn = document.querySelector('.disconnect-wallet-btn');
+    const walletAddressElement = document.querySelector('.wallet-address');
+    const walletNameElement = document.querySelector('.wallet-name');
+    const walletBalanceElement = document.querySelector('.wallet-balance');
+    const walletImageElement = document.querySelector('.wallet-image');
+    const gameStatsContainer = document.querySelector('.game-stats');
+    
+    // Статистические элементы
+    const totalGames = document.getElementById('total-games');
+    const wins = document.getElementById('wins');
+    const winRate = document.getElementById('win-rate');
+    const tonWon = document.getElementById('ton-won');
     
     // Проверка загрузки TON Connect SDK
     if (window.TonConnectSDK) {
@@ -51,174 +56,329 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Функция для отображения списка доступных кошельков
-    async function showWalletList() {
-        try {
-            // Очищаем список кошельков
-            walletsList.innerHTML = '';
-            
-            // Проверяем доступность walletConnector
-            if (!window.walletConnector) {
-                console.error('Ошибка: walletConnector не инициализирован');
-                return;
-            }
-            
-            // Получаем список доступных кошельков
-            const wallets = await window.walletConnector.getWallets();
-            
-            if (!wallets || wallets.length === 0) {
-                walletsList.innerHTML = '<div class="no-wallets">Доступные кошельки не найдены</div>';
-                return;
-            }
-            
-            // Создаем элементы для каждого кошелька
-            wallets.forEach(wallet => {
-                const walletItem = document.createElement('div');
-                walletItem.className = 'wallet-item';
-                
-                // Иконка кошелька (если есть)
-                const walletImg = document.createElement('img');
-                walletImg.src = wallet.imageUrl || 'assets/img/wallet-icon.svg';
-                walletImg.alt = wallet.name;
-                walletImg.className = 'wallet-icon';
-                
-                // Добавляем обработчик ошибки загрузки изображения
-                walletImg.onerror = function() {
-                    // Если не удалось загрузить изображение кошелька, подставляем стандартную иконку
-                    this.src = 'assets/img/wallet-icon.svg';
-                    // Если и эта иконка не загрузится, просто скрываем ошибку
-                    this.onerror = null;
-                };
-                
-                // Название кошелька
-                const walletTitle = document.createElement('div');
-                walletTitle.className = 'wallet-title';
-                walletTitle.textContent = wallet.name;
-                
-                // Добавляем элементы в контейнер
-                walletItem.appendChild(walletImg);
-                walletItem.appendChild(walletTitle);
-                
-                // Добавляем обработчик клика
-                walletItem.addEventListener('click', async () => {
-                    try {
-                        // Закрываем окно выбора кошелька
-                        walletSelect.style.display = 'none';
-                        
-                        // Подключаем выбранный кошелек
-                        await window.walletConnector.connectWallet(wallet.name);
-                        
-                        console.log(`Запрос на подключение ${wallet.name} отправлен`);
-                    } catch (error) {
-                        console.error('Ошибка при подключении кошелька:', error);
-                        alert('Ошибка при подключении кошелька');
-                    }
-                });
-                
-                walletsList.appendChild(walletItem);
-            });
-            
-            // Показываем список кошельков
-            walletSelect.style.display = 'block';
-        } catch (error) {
-            console.error('Ошибка при получении списка кошельков:', error);
-            alert('Не удалось загрузить список доступных кошельков');
-        }
-    }
-    
-    // Подключаем кошелек
-    if (connectWalletButton) {
-        connectWalletButton.addEventListener('click', async () => {
-            await showWalletList();
-        });
-    }
-    
-    // Отключаем кошелек
-    if (disconnectWalletButton) {
-        disconnectWalletButton.addEventListener('click', async () => {
-            try {
-                await window.walletConnector.disconnectWallet();
-                console.log('Кошелек успешно отключен');
-                updateWalletUI(false);
-            } catch (error) {
-                console.error('Ошибка при отключении кошелька:', error);
-            }
-        });
-    }
-    
-    // Обновление UI в зависимости от состояния подключения кошелька
-    function updateWalletUI(isConnected, walletInfo) {
-        if (isConnected && walletInfo) {
-            // Обновляем UI для подключенного кошелька
-            walletNotConnected.style.display = 'none';
-            walletConnected.style.display = 'block';
-            
-            // Обновляем название кошелька
-            if (walletInfo.device && walletInfo.device.appName) {
-                walletName.textContent = walletInfo.device.appName;
-            } else {
-                walletName.textContent = 'TON Wallet';
-            }
-            
-            // Обновляем адрес кошелька
-            if (walletInfo.account && walletInfo.account.address) {
-                const address = walletInfo.account.address;
-                walletAddress.textContent = shortenAddress(address);
-                walletAddress.title = address;
-            }
-            
-            // Обновляем иконку кошелька, если доступна
-            if (walletInfo.device && walletInfo.device.appName) {
-                const appName = walletInfo.device.appName.toLowerCase();
-                if (appName.includes('telegram')) {
-                    walletIcon.src = 'assets/img/telegram-wallet-icon.svg';
-                } else if (appName.includes('tonkeeper')) {
-                    walletIcon.src = 'assets/img/tonkeeper-icon.svg';
-                } else {
-                    walletIcon.src = 'assets/img/wallet-icon.svg';
-                }
-            }
-        } else {
-            // Обновляем UI для отключенного кошелька
-            walletNotConnected.style.display = 'block';
-            walletConnected.style.display = 'none';
-        }
-    }
-    
-    // Слушаем события подключения/отключения кошелька
-    document.addEventListener('walletConnected', function(event) {
-        const wallet = event.detail.wallet;
-        console.log('Кошелек подключен:', wallet);
-        updateWalletUI(true, wallet);
-    });
-    
-    document.addEventListener('walletDisconnected', function() {
-        console.log('Кошелек отключен');
-        updateWalletUI(false);
-    });
-    
-    // Инициализация UI при загрузке страницы
-    function initWalletState() {
-        if (!window.walletConnector) {
-            console.error('walletConnector не инициализирован');
+    // Функция для инициализации страницы профиля
+    async function initProfilePage() {
+        // Проверяем доступность SDK TON Connect
+        if (typeof window.walletConnector === 'undefined') {
+            console.error('Ошибка: SDK TON Connect не найден.');
+            showError('Ошибка загрузки SDK TON Connect. Пожалуйста, обновите страницу.');
             return;
         }
         
-        // Проверяем состояние подключения кошелька
-        const isConnected = window.walletConnector.isWalletConnected();
-        const walletInfo = window.walletConnector.getWalletInfo();
+        // Обработчик события подключения кошелька
+        document.addEventListener('walletConnected', (event) => {
+            const walletInfo = event.detail.wallet;
+            updateUIWithWalletInfo(walletInfo);
+            loadGameStats();
+        });
         
-        console.log('Состояние кошелька при загрузке:', isConnected ? 'Подключен' : 'Отключен');
-        updateWalletUI(isConnected, walletInfo);
+        // Обработчик события отключения кошелька
+        document.addEventListener('walletDisconnected', () => {
+            resetWalletUI();
+        });
+        
+        // Обработчик нажатия на кнопку подключения кошелька
+        if (connectWalletBtn) {
+            connectWalletBtn.addEventListener('click', async () => {
+                try {
+                    // Открываем список доступных кошельков или сразу подключаем предпочтительный
+                    const preferredWallet = window.walletConnector.getPreferredWallet();
+                    if (preferredWallet) {
+                        await window.walletConnector.connectWallet(preferredWallet);
+                    } else {
+                        showWalletSelection();
+                    }
+                } catch (error) {
+                    console.error('Ошибка при подключении кошелька:', error);
+                    showError('Не удалось подключиться к кошельку. Попробуйте еще раз.');
+                }
+            });
+        }
+        
+        // Обработчик нажатия на кнопку отключения кошелька
+        if (disconnectWalletBtn) {
+            disconnectWalletBtn.addEventListener('click', async () => {
+                try {
+                    await window.walletConnector.disconnectWallet();
+                } catch (error) {
+                    console.error('Ошибка при отключении кошелька:', error);
+                    showError('Не удалось отключить кошелек. Попробуйте еще раз.');
+                }
+            });
+        }
+        
+        // Проверяем состояние подключения кошелька при загрузке страницы
+        if (window.walletConnector.isWalletConnected()) {
+            const walletInfo = window.walletConnector.getWalletInfo();
+            updateUIWithWalletInfo(walletInfo);
+            loadGameStats();
+        } else {
+            resetWalletUI();
+        }
     }
     
-    // Сокращение адреса кошелька для отображения
-    function shortenAddress(address) {
-        if (!address) return '';
+    // Функция для отображения выбора кошельков
+    async function showWalletSelection() {
+        try {
+            // Получаем список доступных кошельков
+            const wallets = await window.walletConnector.getWallets();
+            
+            // Создаем элемент с выбором кошельков
+            const walletSelectionElement = document.createElement('div');
+            walletSelectionElement.className = 'wallet-selection-popup';
+            
+            // Заголовок
+            const heading = document.createElement('h3');
+            heading.innerText = 'Выберите кошелек';
+            walletSelectionElement.appendChild(heading);
+            
+            // Список кошельков
+            const walletList = document.createElement('div');
+            walletList.className = 'wallet-list';
+            
+            wallets.forEach(wallet => {
+                const walletItem = document.createElement('div');
+                walletItem.className = 'wallet-item';
+                walletItem.setAttribute('data-wallet-name', wallet.name);
+                
+                // Изображение кошелька
+                const walletImage = document.createElement('img');
+                walletImage.src = wallet.imageUrl;
+                walletImage.alt = wallet.name;
+                walletImage.onerror = () => {
+                    // Если изображение не загрузилось, используем запасное
+                    walletImage.src = '../assets/images/wallets/default-wallet.png';
+                };
+                
+                // Название кошелька
+                const walletName = document.createElement('span');
+                walletName.innerText = wallet.name;
+                
+                walletItem.appendChild(walletImage);
+                walletItem.appendChild(walletName);
+                
+                // Обработчик клика по кошельку
+                walletItem.addEventListener('click', async () => {
+                    try {
+                        await window.walletConnector.connectWallet(wallet.name);
+                        walletSelectionElement.remove();
+                    } catch (error) {
+                        console.error('Ошибка при подключении к кошельку:', error);
+                        showError('Не удалось подключиться к кошельку. Попробуйте еще раз.');
+                    }
+                });
+                
+                walletList.appendChild(walletItem);
+            });
+            
+            walletSelectionElement.appendChild(walletList);
+            
+            // Кнопка закрытия
+            const closeButton = document.createElement('button');
+            closeButton.className = 'close-btn';
+            closeButton.innerText = '✕';
+            closeButton.addEventListener('click', () => {
+                walletSelectionElement.remove();
+            });
+            
+            walletSelectionElement.appendChild(closeButton);
+            
+            // Добавляем элемент на страницу
+            document.body.appendChild(walletSelectionElement);
+            
+        } catch (error) {
+            console.error('Ошибка при получении списка кошельков:', error);
+            showError('Не удалось загрузить список кошельков. Попробуйте еще раз.');
+        }
+    }
+    
+    // Функция обновления UI с информацией о кошельке
+    function updateUIWithWalletInfo(walletInfo) {
+        if (!walletInfo) return;
+        
+        // Показываем информацию о кошельке
+        if (profileContainer) {
+            profileContainer.classList.add('wallet-connected');
+        }
+        
+        // Отображаем адрес кошелька (в сокращенном виде)
+        if (walletAddressElement && walletInfo.account) {
+            const address = walletInfo.account.address;
+            walletAddressElement.innerText = formatAddress(address);
+            walletAddressElement.setAttribute('title', address);
+        }
+        
+        // Отображаем название кошелька
+        if (walletNameElement && walletInfo.device) {
+            walletNameElement.innerText = walletInfo.device.appName || 'Неизвестный кошелек';
+        }
+        
+        // Устанавливаем изображение кошелька
+        if (walletImageElement && walletInfo.device) {
+            const walletName = walletInfo.device.appName || '';
+            
+            // Выбираем изображение в зависимости от названия кошелька
+            let walletImageSrc = '../assets/images/wallets/default-wallet.png';
+            
+            if (walletName.toLowerCase().includes('telegram')) {
+                walletImageSrc = '../assets/images/wallets/telegram-wallet.png';
+            } else if (walletName.toLowerCase().includes('tonkeeper')) {
+                walletImageSrc = '../assets/images/wallets/tonkeeper-wallet.png';
+            } else if (walletName.toLowerCase().includes('tonhub')) {
+                walletImageSrc = '../assets/images/wallets/tonhub-wallet.png';
+            }
+            
+            walletImageElement.src = walletImageSrc;
+            walletImageElement.alt = walletName;
+            
+            // Обработчик ошибки загрузки изображения
+            walletImageElement.onerror = () => {
+                walletImageElement.src = '../assets/images/wallets/default-wallet.png';
+            };
+        }
+        
+        // Показываем/скрываем кнопки подключения/отключения
+        if (connectWalletBtn) {
+            connectWalletBtn.style.display = 'none';
+        }
+        
+        if (disconnectWalletBtn) {
+            disconnectWalletBtn.style.display = 'block';
+        }
+        
+        // Запрашиваем баланс кошелька (если есть такая функция)
+        fetchWalletBalance(walletInfo);
+    }
+    
+    // Функция для сброса UI при отключении кошелька
+    function resetWalletUI() {
+        if (profileContainer) {
+            profileContainer.classList.remove('wallet-connected');
+        }
+        
+        // Очищаем информацию о кошельке
+        if (walletAddressElement) {
+            walletAddressElement.innerText = 'Не подключен';
+            walletAddressElement.removeAttribute('title');
+        }
+        
+        if (walletNameElement) {
+            walletNameElement.innerText = 'Не подключен';
+        }
+        
+        if (walletBalanceElement) {
+            walletBalanceElement.innerText = '0 TON';
+        }
+        
+        if (walletImageElement) {
+            walletImageElement.src = '../assets/images/wallets/default-wallet.png';
+            walletImageElement.alt = 'Wallet';
+        }
+        
+        // Показываем/скрываем кнопки
+        if (connectWalletBtn) {
+            connectWalletBtn.style.display = 'block';
+        }
+        
+        if (disconnectWalletBtn) {
+            disconnectWalletBtn.style.display = 'none';
+        }
+        
+        // Очищаем статистику игры
+        if (gameStatsContainer) {
+            gameStatsContainer.innerHTML = '';
+        }
+    }
+    
+    // Загрузка статистики игры
+    function loadGameStats() {
+        if (!gameStatsContainer) return;
+        
+        try {
+            // Получаем данные из localStorage
+            const gameStatsData = localStorage.getItem('game-stats');
+            let stats = gameStatsData ? JSON.parse(gameStatsData) : {
+                gamesPlayed: 0,
+                gamesWon: 0,
+                totalWinnings: 0,
+                bestResult: 0
+            };
+            
+            // Очищаем контейнер
+            gameStatsContainer.innerHTML = '';
+            
+            // Создаем заголовок
+            const header = document.createElement('h3');
+            header.textContent = 'Статистика игр';
+            gameStatsContainer.appendChild(header);
+            
+            // Отображаем статистические данные
+            const statsItems = [
+                { label: 'Игр сыграно', value: stats.gamesPlayed },
+                { label: 'Побед', value: stats.gamesWon },
+                { label: 'Выигрыш (TON)', value: stats.totalWinnings.toFixed(2) },
+                { label: 'Лучший результат (TON)', value: stats.bestResult.toFixed(2) }
+            ];
+            
+            statsItems.forEach(item => {
+                const statElement = document.createElement('div');
+                statElement.className = 'stat-item';
+                
+                const labelElement = document.createElement('span');
+                labelElement.className = 'stat-label';
+                labelElement.textContent = item.label;
+                
+                const valueElement = document.createElement('span');
+                valueElement.className = 'stat-value';
+                valueElement.textContent = item.value;
+                
+                statElement.appendChild(labelElement);
+                statElement.appendChild(valueElement);
+                gameStatsContainer.appendChild(statElement);
+            });
+            
+        } catch (error) {
+            console.error('Ошибка при загрузке статистики игры:', error);
+        }
+    }
+    
+    // Форматирование адреса кошелька (сокращение)
+    function formatAddress(address) {
+        if (!address || typeof address !== 'string') return 'Неизвестный адрес';
         if (address.length <= 12) return address;
-        return address.substring(0, 6) + '...' + address.substring(address.length - 6);
+        return address.slice(0, 6) + '...' + address.slice(-6);
     }
     
-    // Инициализация после полной загрузки страницы
-    setTimeout(initWalletState, 1000);
+    // Запрос баланса кошелька
+    async function fetchWalletBalance(walletInfo) {
+        if (!walletInfo || !walletInfo.account || !walletBalanceElement) return;
+        
+        try {
+            // Здесь должен быть запрос к API для получения баланса
+            // Временно используем случайное значение
+            const mockBalance = (Math.random() * 10).toFixed(2);
+            walletBalanceElement.innerText = `${mockBalance} TON`;
+        } catch (error) {
+            console.error('Ошибка при получении баланса кошелька:', error);
+            walletBalanceElement.innerText = 'Недоступно';
+        }
+    }
+    
+    // Функция отображения ошибки
+    function showError(message) {
+        const errorElement = document.createElement('div');
+        errorElement.className = 'error-message';
+        errorElement.innerText = message;
+        
+        // Добавляем сообщение на страницу
+        document.body.appendChild(errorElement);
+        
+        // Удаляем через 5 секунд
+        setTimeout(() => {
+            errorElement.remove();
+        }, 5000);
+    }
+    
+    // Инициализация страницы при загрузке
+    initProfilePage();
 }); 
