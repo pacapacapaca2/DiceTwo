@@ -2,12 +2,19 @@
 class TelegramWalletConnector {
   constructor() {
     this.isInitialized = false;
+    // Используем относительный путь к манифесту
     this.tonConnectManifestUrl = './tonconnect-manifest.json';
     this.connector = null;
     this.dAppName = 'DiceTwo';
     
     // Режим отладки выключен - никаких логов на экране
     this.debugMode = false;
+    
+    // Информация о версии
+    this.version = '1.0.1';
+    
+    console.log(`TelegramWalletConnector v${this.version} инициализирован`);
+    console.log(`URL манифеста: ${new URL(this.tonConnectManifestUrl, window.location.href).href}`);
   }
   
   // Логирование только в консоль
@@ -161,11 +168,11 @@ class TelegramWalletConnector {
       
       // Массив источников скриптов в порядке приоритета
       const scriptSources = [
-        // Используем сначала официальный CDN с фиксированной версией SDK (более стабильный подход)
+        // Локальная копия (самый надежный вариант)
+        './ton-connect-sdk.min.js',
+        // CDN источники
         'https://unpkg.com/@tonconnect/sdk@2.1.3/dist/tonconnect-sdk.min.js',
-        // Затем пробуем альтернативные источники
-        'https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect-sdk.min.js',
-        'https://tonconnect.github.io/sdk/tonconnect-web.js'
+        'https://cdn.jsdelivr.net/npm/@tonconnect/sdk@2.1.3/dist/tonconnect-sdk.min.js'
       ];
       
       // Счетчик попыток загрузки
@@ -208,8 +215,53 @@ class TelegramWalletConnector {
           loadScript(scriptSources[attemptIndex]);
         } else {
           console.error("Не удалось загрузить TON Connect SDK из всех источников");
+          // Показываем сообщение пользователю
+          showTonConnectError();
           resolve(); // Завершаем промис, чтобы не блокировать выполнение
         }
+      };
+      
+      // Показываем ошибку пользователю
+      const showTonConnectError = () => {
+        if (document.getElementById('ton-connect-error')) return; // Предотвращаем дублирование
+        
+        const errorDiv = document.createElement('div');
+        errorDiv.id = 'ton-connect-error';
+        errorDiv.style.cssText = `
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background-color: rgba(235, 87, 87, 0.9);
+          color: white;
+          padding: 16px 24px;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+          z-index: 9999;
+          text-align: center;
+          max-width: 90%;
+        `;
+        
+        errorDiv.innerHTML = `
+          <p style="margin-bottom: 16px; font-weight: 500;">Не удалось загрузить TON Connect SDK</p>
+          <button id="retry-ton-connect" style="
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+          ">Попробовать снова</button>
+        `;
+        
+        document.body.appendChild(errorDiv);
+        
+        // Обработчик для кнопки повтора
+        document.getElementById('retry-ton-connect').onclick = () => {
+          document.body.removeChild(errorDiv);
+          location.reload(); // Перезагружаем страницу
+        };
       };
       
       // Начинаем с первого источника

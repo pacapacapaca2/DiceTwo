@@ -130,19 +130,8 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       console.log("Начинаем процесс подключения кошелька");
       
-      // Проверяем, не подключен ли уже кошелек
-      const isConnected = await telegramWalletConnector.isWalletConnected();
-      console.log("Текущий статус подключения кошелька:", isConnected);
-      
-      if (isConnected) {
-        console.log("Кошелек уже подключен");
-        const address = telegramWalletConnector.getWalletAddress();
-        console.log("Адрес кошелька:", address);
-        updateWalletStatus(true, address);
-        return;
-      }
-      
-      // Показываем сообщение о загрузке
+      // Устанавливаем состояние загрузки кнопки
+      connectWalletBtn.disabled = true;
       connectWalletBtn.innerHTML = `
         <div class="spinner" style="width: 20px; height: 20px; border: 2px solid; border-radius: 50%; border-color: white transparent white transparent; animation: spin 1s linear infinite;"></div>
         Подключение...
@@ -161,19 +150,36 @@ document.addEventListener("DOMContentLoaded", () => {
         document.head.appendChild(style);
       }
       
-      // Проверяем доступность SDK перед подключением
-      const sdkAvailable = checkTonConnectAvailability();
-      if (!sdkAvailable) {
-        console.log("Повторная попытка загрузки SDK...");
+      // Проверяем доступность TON Connect SDK
+      if (!window.TonConnect && !window.tonconnect) {
+        console.log("TON Connect SDK не найден, попытка переинициализации...");
         
-        // Пробуем добавить SDK напрямую из CDN
-        const script = document.createElement('script');
-        script.src = 'https://unpkg.com/@tonconnect/sdk@2.1.3/dist/tonconnect-sdk.min.js';
-        script.async = true;
-        document.head.appendChild(script);
+        // Принудительно попытаться загрузить SDK
+        await telegramWalletConnector.loadTonConnectScript();
         
-        // Даем время на загрузку скрипта
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Проверяем еще раз после попытки загрузки
+        if (!window.TonConnect && !window.tonconnect) {
+          console.error("TON Connect SDK не доступен после попыток загрузки");
+          throw new Error("TON Connect SDK недоступен");
+        }
+      }
+      
+      // Проверяем, не подключен ли уже кошелек
+      const isConnected = await telegramWalletConnector.isWalletConnected();
+      console.log("Текущий статус подключения кошелька:", isConnected);
+      
+      if (isConnected) {
+        console.log("Кошелек уже подключен");
+        const address = telegramWalletConnector.getWalletAddress();
+        console.log("Адрес кошелька:", address);
+        updateWalletStatus(true, address);
+        return;
+      }
+      
+      // Инициализируем коннектор перед подключением
+      const initialized = await telegramWalletConnector.initialize();
+      if (!initialized) {
+        throw new Error("Не удалось инициализировать TON Connect");
       }
       
       // Подключаем кошелек через TON Connect
@@ -193,6 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
             console.warn("Не получено подтверждение подключения от кошелька");
             updateWalletStatus(false);
             showConnectionNotification(false);
+            connectWalletBtn.disabled = false; // Разблокируем кнопку
           }
         }, 30000); // 30 секунд таймаут
       } else {
@@ -200,11 +207,21 @@ document.addEventListener("DOMContentLoaded", () => {
         // Возвращаем кнопку в исходное состояние в случае ошибки
         updateWalletStatus(false);
         showConnectionNotification(false);
+        connectWalletBtn.disabled = false; // Разблокируем кнопку
       }
     } catch (error) {
       console.error("Ошибка при подключении кошелька:", error);
       updateWalletStatus(false);
       showConnectionNotification(false);
+      connectWalletBtn.disabled = false; // Разблокируем кнопку
+      
+      // Показываем пользователю подробное сообщение об ошибке
+      if (error.message && error.message.includes("TON Connect SDK недоступен")) {
+        alert("TON Connect SDK недоступен. Пожалуйста, перезагрузите страницу и попробуйте снова.");
+      } else {
+        // Другие ошибки
+        alert("Произошла ошибка при подключении кошелька. Попробуйте еще раз позже.");
+      }
     }
   }
 

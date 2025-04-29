@@ -21,21 +21,24 @@
     <script src="https://telegram.org/js/telegram-web-app-beta.js"></script>
     <script>window.Telegram.WebApp.expand();</script>
     
-    <!-- TON Connect SDK - точная версия для стабильной работы -->
+    <!-- TON Connect SDK - несколько источников для надежности -->
     <script src="https://unpkg.com/@tonconnect/sdk@2.1.3/dist/tonconnect-sdk.min.js"></script>
-    
-    <!-- Резервный источник TON Connect SDK на случай проблем с CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tonconnect/sdk@2.1.3/dist/tonconnect-sdk.min.js"></script>
     <script>
-      // Проверяем загрузку SDK из первого источника
-      setTimeout(function() {
-        if (!window.TonConnect && !window.tonconnect) {
-          console.log("Основной SDK не загрузился, пробуем резервный источник");
-          var script = document.createElement('script');
-          script.src = 'https://cdn.jsdelivr.net/npm/@tonconnect/sdk@latest/dist/tonconnect-sdk.min.js';
-          script.async = true;
-          document.head.appendChild(script);
-        }
-      }, 2000);
+      // Проверяем загрузку SDK и при необходимости загружаем локальную копию
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+          if (!window.TonConnect && !window.tonconnect) {
+            console.log("Fallback: загружаем TON Connect SDK локально");
+            var script = document.createElement('script');
+            script.src = './ton-connect-sdk.min.js';
+            script.onload = function() {
+              console.log("Локальная копия TON Connect SDK загружена");
+            };
+            document.head.appendChild(script);
+          }
+        }, 1000);
+      });
     </script>
     
     <!-- Аналитика Telegram -->
@@ -397,21 +400,5 @@
    <!-- Сначала загружаем wallet-connect.js и затем profile.js -->
    <script src="wallet-connect.js"></script>
    <script src="profile.js"></script>
-   
-   <!-- Инициализация TON Connect SDK -->
-   <script>
-     // Проверяем доступность SDK после загрузки всех скриптов
-     document.addEventListener('DOMContentLoaded', function() {
-       // Проверка через 3 секунды
-       setTimeout(function() {
-         if (!window.TonConnect && !window.tonconnect) {
-           console.error("TON Connect SDK недоступен после загрузки всех скриптов");
-           alert("Не удалось загрузить TON Connect SDK. Пожалуйста, обновите страницу или попробуйте позже.");
-         } else {
-           console.log("TON Connect SDK успешно загружен");
-         }
-       }, 3000);
-     });
-   </script>
 </body>
 </html>
