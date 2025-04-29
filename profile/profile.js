@@ -1,4 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // Подключаем коннектор из глобальной переменной
+  const telegramWalletConnector = window.walletConnector;
+
   const profilePhoto = document.getElementById("profile-photo");
   const profileName = document.getElementById("profile-name");
   const profileUsername = document.getElementById("profile-username");
