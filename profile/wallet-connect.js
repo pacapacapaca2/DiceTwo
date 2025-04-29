@@ -159,6 +159,42 @@ class TelegramWalletConnector {
         document.dispatchEvent(event);
       }
     });
+    
+    // Добавляем слушатель события сообщения от iframe или других окон
+    window.addEventListener('message', (event) => {
+      try {
+        const data = event.data;
+        
+        // Проверяем, что это сообщение от TON Connect
+        if (data && data.type === 'ton-connect-callback') {
+          console.log('Получено сообщение от кошелька:', data);
+          
+          // Обрабатываем успешное подключение
+          if (data.event === 'connect' && data.payload) {
+            // Имитируем подключение кошелька
+            this.saveWalletData({
+              account: {
+                address: data.payload.address || data.payload.ton_addr,
+                chain: data.payload.network || 'mainnet',
+                publicKey: data.payload.publicKey
+              },
+              device: {
+                appName: data.walletName || this.preferredWalletName,
+                appVersion: data.version || '1.0'
+              }
+            });
+            
+            // Отправляем событие о подключении кошелька
+            const event = new CustomEvent('walletConnected', {
+              detail: { wallet: this.getWalletInfo() }
+            });
+            document.dispatchEvent(event);
+          }
+        }
+      } catch (error) {
+        console.error('Ошибка при обработке сообщения от кошелька:', error);
+      }
+    });
   }
 
   // Получение списка доступных кошельков
@@ -247,16 +283,39 @@ class TelegramWalletConnector {
       this.setupWalletStatusChangeListener();
       
       // Подключаемся к выбранному кошельку
-      const connectOptions = {
-        universalLink: selectedWallet.universalLink,
-        bridgeUrl: selectedWallet.bridgeUrl
-      };
-      
-      const connectResult = await this.connector.connect(connectOptions);
-      console.log('Результат запроса на подключение:', connectResult);
-      
-      if (connectResult && connectResult.universal) {
-        console.log('Получена универсальная ссылка для подключения:', connectResult.universal);
+      try {
+        // Создаем объект с опциями для подключения
+        const connectRequest = {
+          items: [{ name: 'ton_addr' }]
+        };
+        
+        // Получаем ссылку для подключения
+        const universalLink = selectedWallet.universalLink || selectedWallet.bridgeUrl;
+        
+        if (!universalLink) {
+          throw new Error('У выбранного кошелька отсутствует universalLink или bridgeUrl');
+        }
+
+        // Создаем URL для перехода к кошельку (используем Telegram если это Telegram Wallet)
+        let connectUrl;
+        
+        // Проверяем, является ли это Telegram кошельком
+        if (selectedWallet.name.toLowerCase().includes('telegram') || 
+            universalLink.toLowerCase().includes('t.me') || 
+            universalLink.toLowerCase().includes('telegram')) {
+          
+          // Формат для Telegram Wallet
+          const telegramAppName = 'tonconnect';
+          const telegramStartParams = `v=2&id=${this.connector.sessionCrypto?.sessionId || Math.random().toString(36).substring(2)}&r=${encodeURIComponent(JSON.stringify(connectRequest))}`;
+          
+          // Создаем ссылку для Telegram Wallet
+          connectUrl = `${universalLink}/start?startapp=${telegramAppName}-${telegramStartParams.replaceAll('=', '__').replaceAll('&', '-')}`;
+        } else {
+          // Формат для других кошельков
+          connectUrl = `${universalLink}?v=2&id=${this.connector.sessionCrypto?.sessionId || Math.random().toString(36).substring(2)}&r=${encodeURIComponent(JSON.stringify(connectRequest))}`;
+        }
+        
+        console.log('Получена универсальная ссылка для подключения:', connectUrl);
         
         // Перенаправляем пользователя для подключения кошелька
         if (window.parent && window.parent !== window) {
@@ -264,7 +323,7 @@ class TelegramWalletConnector {
           window.parent.postMessage(
             {
               type: 'ton-connect',
-              universal: connectResult.universal,
+              universal: connectUrl,
               method: 'connect',
               wallet: selectedWallet.name
             }, 
@@ -272,16 +331,17 @@ class TelegramWalletConnector {
           );
         } else {
           // Иначе открываем ссылку в новом окне/вкладке
-          window.open(connectResult.universal, '_blank');
+          window.open(connectUrl, '_blank');
         }
         
         return {
           success: true,
           walletName: selectedWallet.name,
-          universal: connectResult.universal
+          universal: connectUrl
         };
-      } else {
-        throw new Error('Не удалось получить ссылку для подключения кошелька');
+      } catch (error) {
+        console.error('Ошибка при создании ссылки для подключения:', error);
+        throw new Error('Не удалось создать ссылку для подключения кошелька');
       }
     } catch (error) {
       console.error('Ошибка при подключении кошелька:', error);
@@ -549,6 +609,31 @@ class TelegramWalletConnector {
     }
     
     return address.slice(0, 6) + '...' + address.slice(-6);
+  }
+
+  /**
+   * Установка предпочитаемого кошелька
+   * @param {string} walletName - Название кошелька
+   */
+  setPreferredWallet(walletName) {
+    if (walletName && typeof walletName === 'string') {
+      this.preferredWalletName = walletName;
+      console.log(`Установлен предпочитаемый кошелек: ${walletName}`);
+      
+      try {
+        // Сохраняем предпочитаемый кошелек в localStorage
+        const savedData = localStorage.getItem(this.storageKey);
+        const data = savedData ? JSON.parse(savedData) : { wallet: null };
+        
+        localStorage.setItem(this.storageKey, JSON.stringify({
+          ...data,
+          preferredWalletName: walletName,
+          updatedAt: new Date().toISOString()
+        }));
+      } catch (error) {
+        console.error('Ошибка при сохранении предпочитаемого кошелька:', error);
+      }
+    }
   }
 }
 

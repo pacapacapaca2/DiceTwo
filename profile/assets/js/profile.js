@@ -82,6 +82,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 walletImg.alt = wallet.name;
                 walletImg.className = 'wallet-icon';
                 
+                // Добавляем обработчик ошибки загрузки изображения
+                walletImg.onerror = function() {
+                    // Если не удалось загрузить изображение кошелька, подставляем стандартную иконку
+                    this.src = 'assets/img/wallet-icon.svg';
+                    // Если и эта иконка не загрузится, просто скрываем ошибку
+                    this.onerror = null;
+                };
+                
                 // Название кошелька
                 const walletTitle = document.createElement('div');
                 walletTitle.className = 'wallet-title';
